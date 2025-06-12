@@ -1,4 +1,4 @@
-#!../../bin/rhel7-x86_64/CounterPortDriver
+#!../../bin/rhel9-x86_64/CounterPortDriver
 
 #- You may have to change CounterPortDriver to something else
 #- everywhere it appears in this file
