@@ -17,11 +17,12 @@
 using namespace std;
 
 #define P_FlipCoilString "SCOPE_FLIPCOIL"
-
-class GetterDriver : public asynPortDriver {
+#define NUM_MEASUREMENTS 4
+#define COIL_SAMPLES 1000
+class FlipCoilDriver : public asynPortDriver {
   public:
-    GetterDriver(const char *portName);
-    void getterTask(void);
+    FlipCoilDriver(const char *portName);
+    void flipCoilTask(void);
   protected:
-    int P_Getter;
+    int P_FlipCoil;
 };

@@ -42,6 +42,29 @@ void FlipCoilDriver::flipCoilTask(void)
     getDoubleParam(P_FlipCoil, &variable);
     printf("Retrieved variable is %f\n", variable);
   }
+  #blmeasbl measurement
+
+  #coilmeasvt
+  float vt_pos[NUM_MEASUREMENTS];
+  float vt_neg[NUM_MEASUREMENTS];
+
+  float coil_samples[COIL_SAMPLES];
+
+  for(int i = 0; i < NUM_MEASUREMENTS; i++)
+  {
+    //Two steps happen here 
+    //First coil_samples is filled with the values from a sine wave
+    //Then the time integral is calculated within coil_samples coilintpeak
+
+    for(int j = 0; j < COIL_SAMPLES; j++)
+    {
+      coil_samples[j] = -1* coil_samples[j]
+    }
+    //Third a a time integral of the negative samples is calculated coilintpeak
+
+
+
+  }
 }
 
 
