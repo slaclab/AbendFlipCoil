@@ -27,6 +27,8 @@ CounterPortDriver_SRCS += CounterPortDriver_registerRecordDeviceDriver.cpp
 CounterPortDriver_SRCS += counter.cpp
 CounterPortDriver_SRCS += getter.cpp
 CounterPortDriver_SRCS += tank.cpp
+CounterPortDriver_SRCS += flipcoil_util.cpp
+CounterPortDriver_SRCS += flipcoil.cpp
 
 # Build the main IOC entry point on workstation OSs.
 CounterPortDriver_SRCS_DEFAULT += CounterPortDriverMain.cpp

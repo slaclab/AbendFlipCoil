@@ -19,6 +19,7 @@ using namespace std;
 #define P_FlipCoilString "SCOPE_FLIPCOIL"
 #define NUM_MEASUREMENTS 4
 #define COIL_SAMPLES 1000
+#define COIL_DELTA 0.019
 class FlipCoilDriver : public asynPortDriver {
   public:
     FlipCoilDriver(const char *portName);

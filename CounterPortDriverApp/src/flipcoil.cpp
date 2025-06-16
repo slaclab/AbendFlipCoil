@@ -1,6 +1,7 @@
 //FlipCoil.cpp
 
 #include "flipcoil.h"
+#include "flipcoil_util.h"
 #include <unistd.h>
 
 void flipCoilTask(void *driverPointer);
@@ -18,7 +19,7 @@ FlipCoilDriver::FlipCoilDriver(const char *portName): asynPortDriver(
 {
   createParam(P_FlipCoilString, asynParamFloat64, &P_FlipCoil);
   asynStatus status;
-  status = (asynStatus)(epicsThreadCreate("LujkoFlipCoilTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::getterTask, this) == NULL);
+  status = (asynStatus)(epicsThreadCreate("LujkoFlipCoilTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::flipCoilTask, this) == NULL);
   if (status)
   {
     printf("Thread shot itself for some reason");
@@ -28,8 +29,8 @@ FlipCoilDriver::FlipCoilDriver(const char *portName): asynPortDriver(
 
 void flipCoilTask(void *driverPointer)
 {
-  FlipCoilDriver *pPvt = (GetterDriver *) driverPointer;
-  pPvt->FlipCoilTask();
+  FlipCoilDriver *pPvt = (FlipCoilDriver *) driverPointer;
+  pPvt->flipCoilTask();
 }
 
 void FlipCoilDriver::flipCoilTask(void)
@@ -42,29 +43,67 @@ void FlipCoilDriver::flipCoilTask(void)
     getDoubleParam(P_FlipCoil, &variable);
     printf("Retrieved variable is %f\n", variable);
   }
-  #blmeasbl measurement
+  //blmeasbl measurement
 
-  #coilmeasvt
+  //coilmeasvt
   float vt_pos[NUM_MEASUREMENTS];
   float vt_neg[NUM_MEASUREMENTS];
+  float vt_avg[NUM_MEASUREMENTS]; // (pos - -neg) / 2
 
-  float coil_samples[COIL_SAMPLES];
+  vector<float> coil_samples;
 
   for(int i = 0; i < NUM_MEASUREMENTS; i++)
   {
-    //Two steps happen here 
     //First coil_samples is filled with the values from a sine wave
+    sineWaveTester(coil_samples);
     //Then the time integral is calculated within coil_samples coilintpeak
-
-    for(int j = 0; j < COIL_SAMPLES; j++)
+    float pos_peak = coilIntPeak(COIL_SAMPLES, COIL_DELTA, coil_samples);
+    
+    for (float& val: coil_samples)
     {
-      coil_samples[j] = -1* coil_samples[j]
+      //Flip values around the x axis to calculate the negative peak
+      val *= -1;
     }
     //Third a a time integral of the negative samples is calculated coilintpeak
-
-
+    
+    float neg_peak = -1 * coilIntPeak(COIL_SAMPLES, COIL_DELTA, coil_samples);
+    
+    //Check for forward and reverse half cycles, takes results from coilintpeak 
+    if (neg_peak * pos_peak >= 0)
+    {
+      printf("Problems, didn't receive coil voltages most likely");
+      throw runtime_error("Neg_peak * pos_peak returned a positive number or was zero, should be impossible");
+    }
+    if (pos_peak > 0 )
+    {
+      vt_pos[i] = pos_peak;
+      vt_neg[i] = neg_peak;
+    }
+    else 
+    {
+      vt_pos[i] = neg_peak;
+      vt_neg[i] = pos_peak;
+    }
+    vt_avg[i] = (vt_pos[i] - vt_neg[i]) / 2;
 
   }
+  
+  //Finding the mean of integrated voltage values
+  float sum = 0;
+  for(int j = 0; j < NUM_MEASUREMENTS; j++)
+  {
+    sum += vt_avg[j];
+  }
+  //TODO Pass this by reference? or make the task return this, im not sure what it's used for
+  float avg = sum / NUM_MEASUREMENTS;
+
+  //Finding standard deviation
+  sum = 0;
+  for(int k = 0; k < NUM_MEASUREMENTS; k++)
+  {
+    sum += pow((vt_avg[k] - avg), 2);
+  }
+  float std_dev = sqrt(sum / NUM_MEASUREMENTS);
 }
 
 
@@ -74,7 +113,7 @@ extern "C" {
     return asynSuccess;
   }
   static const iocshArg FlipCoilArg0 ={"portName", iocshArgString};
-  static const iocshArg * const FlipCoilArgs[] = {&getterArg0};
+  static const iocshArg * const FlipCoilArgs[] = {&FlipCoilArg0};
   static const iocshFuncDef FlipCoilFuncDef = {"FlipCoilDriverConfigure", 1, FlipCoilArgs};
   static void FlipCoilCallFunc(const iocshArgBuf *args)
   {
