@@ -6,10 +6,25 @@
 void peakIsolator(int& start, int& end, int& peak, vector<float> samples)
 {
   int total_samples = samples.size();
+  peak = 0;
+  //Find peak
   for(int i = 1; i < total_samples; i++)
   {
-    
+    if(samples[i] > samples[peak])
+    {
+      peak = i;
+    }
   }
+  start = 0;
+  for(int j = peak; j >= 1; j--)
+  {
+    if(samples[j-1] <= 0 && samples[j] >= 0 )
+    {
+      start = j -1;
+      break;
+    }
+  }
+  end = 0;
 }
 float coilIntPeak(int samples, float coil_delta, vector<float> voltage_samples)
 {
