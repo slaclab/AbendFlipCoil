@@ -35,14 +35,16 @@ void flipCoilTask(void *driverPointer)
 
 void FlipCoilDriver::flipCoilTask(void)
 {
+  /**
   double variable;
   for(int x = 0; x <= 100; x++)
   {
     sleep(1);
     //printf("Things");
     getDoubleParam(P_FlipCoil, &variable);
-    printf("Retrieved variable is %f\n", variable);
+    //printf("Retrieved variable is %f\n", variable);
   }
+  **/
   //blmeasbl measurement
 
   //coilmeasvt
@@ -51,13 +53,20 @@ void FlipCoilDriver::flipCoilTask(void)
   float vt_avg[NUM_MEASUREMENTS]; // (pos - -neg) / 2
 
   vector<float> coil_samples;
+  float neg_peak = -1;
+  float pos_peak = 1;
 
   for(int i = 0; i < NUM_MEASUREMENTS; i++)
   {
     //First coil_samples is filled with the values from a sine wave
     sineWaveTester(coil_samples);
+    for(int val : coil_samples)
+    {
+      printf("%d", val);
+    }
     //Then the time integral is calculated within coil_samples coilintpeak
-    float pos_peak = coilIntPeak(COIL_SAMPLES, COIL_DELTA, coil_samples);
+    //TODO: Comment the line back in
+    //float pos_peak = coilIntPeak(COIL_SAMPLES, COIL_DELTA, coil_samples);
     
     for (float& val: coil_samples)
     {
@@ -65,8 +74,8 @@ void FlipCoilDriver::flipCoilTask(void)
       val *= -1;
     }
     //Third a a time integral of the negative samples is calculated coilintpeak
-    
-    float neg_peak = -1 * coilIntPeak(COIL_SAMPLES, COIL_DELTA, coil_samples);
+    //TODO: Comment the line under this back in figure out why it won't compile
+    //float neg_peak = -1 * coilIntPeak(COIL_SAMPLES, COIL_DELTA, coil_samples);
     
     //Check for forward and reverse half cycles, takes results from coilintpeak 
     if (neg_peak * pos_peak >= 0)
