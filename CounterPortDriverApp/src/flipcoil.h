@@ -16,7 +16,7 @@
 
 using namespace std;
 
-#define P_FlipCoilString "SCOPE_FLIPCOIL"
+#define P_FlipCoilString "SINE_WAVE"
 #define NUM_MEASUREMENTS 4
 #define COIL_SAMPLES 1000
 #define COIL_DELTA 0.019

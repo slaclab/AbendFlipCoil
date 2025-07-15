@@ -58,9 +58,14 @@ float coilIntPeak(float coil_delta, vector<float> voltage_samples)
   //So the original way was a little bit weird
   //Just going to do a full trapezoid rule for the entire hting
   //Rather than mix and match 3 different integrals
+  //printf("\n\n\n\n\n");
   float to_ret = 0;
   for(int i = 0; i < voltage_samples.size(); i++)
   {
+    if(voltage_samples[i] < 0)
+    {
+      continue;
+    }
     if(i == 0 || i == voltage_samples.size() - 1)
     {
       to_ret += voltage_samples[i];
@@ -72,6 +77,7 @@ float coilIntPeak(float coil_delta, vector<float> voltage_samples)
     }
 
   }
+  //printf("\n\n\n\n\n\n");
   
   return (coil_delta / 2) * to_ret;
 }

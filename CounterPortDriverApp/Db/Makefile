@@ -7,7 +7,8 @@ include $(TOP)/configure/CONFIG
 # Create and install (or just install) into <top>/db
 # databases, templates, substitutions like this
 #DB += xxx.db
-DB += counter.db
+#DB += counter.db
+DB += flip.db
 #DB += getter.db
 #DB += tank.db
 #----------------------------------------------------
