@@ -5,6 +5,7 @@
 #include <unistd.h>
 
 void flipCoilTask(void *driverPointer);
+FlipCoilDriver* FlipCoilDriver::port_driver = nullptr;
 
 FlipCoilDriver::FlipCoilDriver(const char *portName): asynPortDriver(
     portName,
@@ -14,7 +15,7 @@ FlipCoilDriver::FlipCoilDriver(const char *portName): asynPortDriver(
     0,
     1,
     0,
-    0
+0
     )
 {
   createParam(P_FlipCoilString, asynParamFloat64, &P_FlipCoil);
@@ -36,104 +37,115 @@ void flipCoilTask(void *driverPointer)
 void FlipCoilDriver::flipCoilTask(void)
 {
   
-  double variable;
-  vector<float> coil_samples;
-  sleep(10);
-  double prev = -3;
-  int x = 0;
-  while (x < 1000)
+  sleep(1);
+  while(1)
   {
-    
-    //printf("Things");
-    getDoubleParam(P_FlipCoil, &variable);
-    if (variable != prev)
-    {
-      coil_samples.push_back(variable);
-      prev = variable;
-      printf("Retrieved variable is %f\n", variable);
-      x += 1;
-    }
-    //coil_samples.push_back(variable);
-  }
   
-  //blmeasbl measurement
+    //blmeasbl measurement
 
-  //coilmeasvt
-  float vt_pos[NUM_MEASUREMENTS];
-  float vt_neg[NUM_MEASUREMENTS];
-  float vt_avg[NUM_MEASUREMENTS]; // (pos - -neg) / 2
+    //coilmeasvt
+    float vt_pos[NUM_MEASUREMENTS];
+    float vt_neg[NUM_MEASUREMENTS];
+    float vt_avg[NUM_MEASUREMENTS]; // (pos - -neg) / 2
 
-  //vector<float> coil_samples;
-  float neg_peak = -1;
-  float pos_peak = 1;
-
-  for(int i = 0; i < NUM_MEASUREMENTS; i++)
-  {
-    //First coil_samples is filled with the values from a sine wave
-    sineWaveTester(coil_samples);
-    /**
-    for(float val : coil_samples)
+    //vector<float> coil_samples;
+    double variable;
+  
+    for(int i = 0; i < NUM_MEASUREMENTS; i++)
     {
-      printf("%g\n", val);
-    }
-    **/
-    //Then the time integral is calculated within coil_samples coilintpeak
-    //TODO: Comment the line back in
-    float pos_peak = coilIntPeak(COIL_DELTA, coil_samples);
+      vector<float> coil_samples;
+      double prev = -3;
+      int x = 0;
+
+      //
+      while (x < COIL_SAMPLES)
+      {
     
-    for (float& val: coil_samples)
-    {
-      //Flip values around the x axis to calculate the negative peak
-      val *= -1;
-    }
-    //Third a a time integral of the negative samples is calculated coilintpeak
-    //TODO: Comment the line under this back in figure out why it won't compile
-    float neg_peak = -1 * coilIntPeak(COIL_DELTA, coil_samples);
+        //printf("Things");
+        getDoubleParam(P_FlipCoil, &variable);
+        if (variable != prev)
+        {
+          coil_samples.push_back(variable);
+          prev = variable;
+          //printf("Retrieved variable is %f\n", variable);
+          x += 1;
+        }
+        //coil_samples.push_back(variable);
+      }
+      //First coil_samples is filled with the values from a sine wave
+      //sineWaveTester(coil_samples);
+      //Then the time integral is calculated within coil_samples coilintpeak
+      float pos_peak = coilIntPeak(COIL_DELTA, coil_samples);
+      
+      for (float& val: coil_samples)
+      {
+        //Flip values around the x axis to calculate the negative peak
+        val *= -1;
+      }
+      //Third a a time integral of the negative samples is calculated coilintpeak
+      float neg_peak = -1 * coilIntPeak(COIL_DELTA, coil_samples);
     
-    //Check for forward and reverse half cycles, takes results from coilintpeak 
-    if (neg_peak * pos_peak >= 0)
-    {
-      printf("Problems, didn't receive coil voltages most likely");
-      throw runtime_error("Neg_peak * pos_peak returned a positive number or was zero, should be impossible");
-    }
-    if (pos_peak > 0 )
-    {
-      vt_pos[i] = pos_peak;
-      vt_neg[i] = neg_peak;
-    }
-    else 
-    {
-      vt_pos[i] = neg_peak;
-      vt_neg[i] = pos_peak;
-    }
-    vt_avg[i] = (vt_pos[i] - vt_neg[i]) / 2;
+      //Check for forward and reverse half cycles, takes results from coilintpeak 
+      //TODO Figure out why this if statement is necessary
+      printf("Calculated Pos Peak: %f Calculated Neg Peak: %f\n\n", pos_peak, neg_peak);
+      /**
+      if (neg_peak * pos_peak >= 0)
+      {
+        printf("Problems, didn't receive coil voltages most likely");
+        throw runtime_error("Neg_peak * pos_peak returned a positive number or was zero, should be impossible");
+      }
+      **/
+      if (pos_peak > 0 )
+      {
+        vt_pos[i] = pos_peak;
+        vt_neg[i] = neg_peak;
+      }
+      else 
+      {
+        vt_pos[i] = neg_peak;
+        vt_neg[i] = pos_peak;
+      }
+      vt_avg[i] = (vt_pos[i] - vt_neg[i]) / 2;
     //printf("Integrated calculation, %g\n", vt_avg[i]);
 
-  }
+    }
   
-  //Finding the mean of integrated voltage values
-  float sum = 0;
-  for(int j = 0; j < NUM_MEASUREMENTS; j++)
-  {
-    sum += vt_avg[j];
-  }
+    //Finding the mean of integrated voltage values
+    float sum = 0;
+    for(int j = 0; j < NUM_MEASUREMENTS; j++)
+    {
+      sum += vt_avg[j];
+    }
 
-  //TODO Pass this by reference? or make the task return this, im not sure what it's used for
-  float avg = sum / NUM_MEASUREMENTS;
-  printf("\n\n\nAveraged integral %g", avg);
-  //Finding standard deviation
-  sum = 0;
-  for(int k = 0; k < NUM_MEASUREMENTS; k++)
-  {
-    sum += pow((vt_avg[k] - avg), 2);
+    //TODO Pass this by reference? or make the task return this, im not sure what it's used for
+    float avg = sum / NUM_MEASUREMENTS;
+    Avg_Int.store(avg);
+    printf("\n\n\nAveraged integral %g", avg);
+    //Finding standard deviation
+    sum = 0;
+    for(int k = 0; k < NUM_MEASUREMENTS; k++)
+    {
+      sum += pow((vt_avg[k] - avg), 2);
+    }
+    float std_dev = sqrt(sum / NUM_MEASUREMENTS);
   }
-  float std_dev = sqrt(sum / NUM_MEASUREMENTS);
 }
 
+FlipCoilDriver* FlipCoilDriver::getPortDriver()
+{
+  return FlipCoilDriver::port_driver;
+}
+
+void FlipCoilDriver::setPortDriver(FlipCoilDriver* portDriver)
+{
+  FlipCoilDriver::port_driver = portDriver;
+}
 
 extern "C" {
   int FlipCoilDriverConfigure(const char* portName) {
-    new FlipCoilDriver(portName);
+
+    FlipCoilDriver* temp = new FlipCoilDriver(portName);
+    FlipCoilDriver::setPortDriver(temp);
     return asynSuccess;
   }
   static const iocshArg FlipCoilArg0 ={"portName", iocshArgString};
@@ -149,3 +161,22 @@ extern "C" {
   epicsExportRegistrar(FlipCoilDriverRegister);
 }
 
+static void integralCalc(void)
+{
+  FlipCoilDriver* driver = FlipCoilDriver::getPortDriver();
+  printf("\nCalculated integral: %f\n", driver->Avg_Int.load());
+  return;
+}
+static const iocshFuncDef integralCalcDef = {"integralCalc", 0};
+static void integralCallFunc(const iocshArgBuf *args)
+{
+  integralCalc();
+}
+void integralCalcRegister(void)
+{
+  iocshRegister(&integralCalcDef, integralCallFunc);
+}
+extern "C"
+{
+  epicsExportRegistrar(integralCalcRegister);
+}
