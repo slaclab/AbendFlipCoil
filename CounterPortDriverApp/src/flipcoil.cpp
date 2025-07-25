@@ -58,32 +58,51 @@ void FlipCoilDriver::flipCoilTask(void)
       int x = 0;
 
       //
-      while (x < COIL_SAMPLES)
-      {
-    
-        //printf("Things");
-        getDoubleParam(P_FlipCoil, &variable);
-        if (variable != prev)
-        {
-          coil_samples.push_back(variable);
-          prev = variable;
-          //printf("Retrieved variable is %f\n", variable);
-          x += 1;
-        }
-        //coil_samples.push_back(variable);
-      }
-      //First coil_samples is filled with the values from a sine wave
-      //sineWaveTester(coil_samples);
-      //Then the time integral is calculated within coil_samples coilintpeak
-      float pos_peak = coilIntPeak(COIL_DELTA, coil_samples);
+      getDoubleParam(P_FlipCoil, &prev);
+      getDoubleParam(P_FlipCoil, &variable);
       
-      for (float& val: coil_samples)
+      while (prev * variable > 0)
       {
-        //Flip values around the x axis to calculate the negative peak
-        val *= -1;
+        prev = variable;
+        getDoubleParam(P_FlipCoil, &variable);
       }
+      //As soon as we break this loop we're finding the bits we're trying to integrate 
+      vector<float> pos_samples;
+      vector<float> neg_samples;
+      int crossings = 0;
+      while (crossings < 3)
+      {
+        
+        getDoubleParam(P_FlipCoil, &variable);
+        if(variable == prev)
+        {
+          continue;
+        }
+        if(variable * prev < 0)
+        {
+          crossings += 1;
+        }
+        if (crossings == 3)
+        {
+          printf("Completed sine wave stored\n\n");
+          break;
+        }
+        if (variable < 0)
+        {
+          neg_samples.push_back(-1 * variable);
+        }
+        else 
+        {
+          pos_samples.push_back(variable);
+        }
+        prev = variable;
+
+      }
+      //Then the time integral is calculated within coil_samples coilintpeak
+      float pos_peak = coilIntPeak(COIL_DELTA, pos_samples);
+      
       //Third a a time integral of the negative samples is calculated coilintpeak
-      float neg_peak = -1 * coilIntPeak(COIL_DELTA, coil_samples);
+      float neg_peak = -1 * coilIntPeak(COIL_DELTA, neg_samples);
     
       //Check for forward and reverse half cycles, takes results from coilintpeak 
       //TODO Figure out why this if statement is necessary
