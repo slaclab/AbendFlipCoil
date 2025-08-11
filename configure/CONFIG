@@ -4,6 +4,7 @@
 
 # Allow user to override where the build rules come from
 RULES = $(EPICS_BASE)
+T_A   = rhel9-x86_64
 
 # RELEASE files point to other application tops
 include $(TOP)/configure/RELEASE

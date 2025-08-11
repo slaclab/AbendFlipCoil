@@ -15,6 +15,13 @@ CounterPortDriver_registerRecordDeviceDriver pdbbase
 ##CounterDriverConfigure("lujko")
 ##GetterDriverConfigure("lujko1")
 ##WaterDriverConfigure("lujko2")
+
+#Beckoff add in
+
+drvAsynIPPortConfigure("beckhoff", "beckhoff_node", 0, 0, 1)
+modbusInterposeConfig("beckhoff", 0, 2000, 0)
+drvModbusAsynConfigure("BKHF1_3102", "beckhoff", 0,3, 0, 16, 0, 1000, "KL3102")
+
 FlipCoilDriverConfigure("lujko1")
 
 ## Load record instances
