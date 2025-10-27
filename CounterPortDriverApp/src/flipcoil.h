@@ -30,6 +30,8 @@ class FlipCoilDriver : public asynPortDriver {
     static void setPortDriver(FlipCoilDriver* portDriver);
     atomic<float> Avg_Int;
 
+    virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
+
   protected:
     //mutex m;
     //float Avg_Int;
