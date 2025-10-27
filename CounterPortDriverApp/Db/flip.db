@@ -1,24 +1,27 @@
 ## flip.db
 
-record(ai, "$(USER):get:set:one")
+
+#This is a sort of redundant record atm, eventually will be output record for stuff
+record(ai, "$(P):INTEGRAL_RECEIVER_SENDER")
 {
     field(PINI, "1")
     field(DTYP, "asynFloat64")
     field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))SINE_WAVE")
-    field(SCAN, "I/O Intr")
+    #field(SCAN, "I/O Intr")
   }
 
-record(ao, "$(USER):get:set:two")
+#Currently takes data from an epics record 
+record(ao, "$(P):INTEGRAL_RECEIVER")
 {
     field(PINI, "1")
     field(DTYP, "asynFloat64")
     field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))SINE_WAVE")
   }
 
-record(calcout, "$(USER):sine:wave")
+record(calcout, "$(P):SINE_WAVE_GENERATOR")
 {
   field(INPA, "1")
   field(SCAN, ".1 second")
   field(CALC, "3 * sin(2*a); a:=a+D2R")
-  field(OUT, "$(USER):get:set:two PP")
+  field(OUT, "$(P):INTEGRAL_RECEIVER PP")
   }
