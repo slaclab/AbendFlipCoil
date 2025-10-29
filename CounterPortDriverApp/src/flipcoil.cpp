@@ -7,7 +7,7 @@
 void flipCoilTask(void *driverPointer);
 FlipCoilDriver* FlipCoilDriver::port_driver = nullptr;
 
-FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp): asynPortDriver(
+FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr): asynPortDriver(
     portName,
     1,
     asynFloat64Mask,
@@ -168,19 +168,20 @@ void FlipCoilDriver::setPortDriver(FlipCoilDriver* portDriver)
 }
 
 extern "C" {
-  int FlipCoilDriverConfigure(const char* portName) {
+  int FlipCoilDriverConfigure(const char* portName, const char* udp, int addr) {
 
-    FlipCoilDriver* temp = new FlipCoilDriver(portName);
+    FlipCoilDriver* temp = new FlipCoilDriver(portName, udp, addr);
     FlipCoilDriver::setPortDriver(temp);
     return asynSuccess;
   }
   static const iocshArg FlipCoilArg0 ={"portName", iocshArgString};
   static const iocshArg FlipCoilArg1 ={"udp", iocshArgString};
+  static const iocshArg FlipCoilArg2 ={"addr", iocshArgInt};
   static const iocshArg * const FlipCoilArgs[] = {&FlipCoilArg0, &FlipCoilArg1};
-  static const iocshFuncDef FlipCoilFuncDef = {"FlipCoilDriverConfigure", 2, FlipCoilArgs};
+  static const iocshFuncDef FlipCoilFuncDef = {"FlipCoilDriverConfigure", 4, FlipCoilArgs};
   static void FlipCoilCallFunc(const iocshArgBuf *args)
   {
-    FlipCoilDriverConfigure(args[0].sval);
+    FlipCoilDriverConfigure(args[0].sval, args[1].sval, args[2].ival);
   }
   void FlipCoilDriverRegister(void) {
     iocshRegister(&FlipCoilFuncDef, FlipCoilCallFunc);

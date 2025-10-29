@@ -15,6 +15,7 @@
 #include <epicsTimer.h>
 #include <epicsTypes.h>
 #include <asynPortDriver.h>
+#include <asynOctetSyncIO.h>
 
 using namespace std;
 
@@ -24,7 +25,7 @@ using namespace std;
 #define COIL_DELTA 0.019
 class FlipCoilDriver : public asynPortDriver {
   public:
-    FlipCoilDriver(const char *portName);
+    FlipCoilDriver(const char *portName, const char *udp, int addr);
     void flipCoilTask(void);
     static FlipCoilDriver* getPortDriver();
     static void setPortDriver(FlipCoilDriver* portDriver);
