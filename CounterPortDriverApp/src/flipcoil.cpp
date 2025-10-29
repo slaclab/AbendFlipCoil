@@ -7,7 +7,7 @@
 void flipCoilTask(void *driverPointer);
 FlipCoilDriver* FlipCoilDriver::port_driver = nullptr;
 
-FlipCoilDriver::FlipCoilDriver(const char *portName): asynPortDriver(
+FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp): asynPortDriver(
     portName,
     1,
     asynFloat64Mask,
@@ -18,8 +18,15 @@ FlipCoilDriver::FlipCoilDriver(const char *portName): asynPortDriver(
 0
     )
 {
+  asynStatus status = pasynOctetSyncIO->connect(udp, addr, &pasynUser, 0);
+  
+  if (status != asynSuccess)
+  {
+    printf("Failed to connect over udp port\n");
+    return;
+  }
   createParam(P_FlipCoilString, asynParamFloat64, &P_FlipCoil);
-  asynStatus status;
+
   status = (asynStatus)(epicsThreadCreate("LujkoFlipCoilTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::flipCoilTask, this) == NULL);
   if (status)
   {
@@ -168,8 +175,9 @@ extern "C" {
     return asynSuccess;
   }
   static const iocshArg FlipCoilArg0 ={"portName", iocshArgString};
-  static const iocshArg * const FlipCoilArgs[] = {&FlipCoilArg0};
-  static const iocshFuncDef FlipCoilFuncDef = {"FlipCoilDriverConfigure", 1, FlipCoilArgs};
+  static const iocshArg FlipCoilArg1 ={"udp", iocshArgString};
+  static const iocshArg * const FlipCoilArgs[] = {&FlipCoilArg0, &FlipCoilArg1};
+  static const iocshFuncDef FlipCoilFuncDef = {"FlipCoilDriverConfigure", 2, FlipCoilArgs};
   static void FlipCoilCallFunc(const iocshArgBuf *args)
   {
     FlipCoilDriverConfigure(args[0].sval);

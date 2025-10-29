@@ -40,4 +40,5 @@ class FlipCoilDriver : public asynPortDriver {
     
   private:
     static FlipCoilDriver* port_driver;
+    asynUser *pasynUser;
 };
