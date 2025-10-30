@@ -18,11 +18,11 @@ CounterPortDriver_registerRecordDeviceDriver pdbbase
 
 #Beckoff add in
 
-drvAsynIPPortConfigure("beckhoff", "beckhoff_node", 0, 0, 1)
-modbusInterposeConfig("beckhoff", 0, 2000, 0)
-drvModbusAsynConfigure("BKHF1_3102", "beckhoff", 0,3, 0, 16, 0, 1000, "KL3102")
+#drvAsynIPPortConfigure("beckhoff", "beckhoff_node", 0, 0, 1)
+#modbusInterposeConfig("beckhoff", 0, 2000, 0)
+#drvModbusAsynConfigure("BKHF1_3102", "beckhoff", 0,3, 0, 16, 0, 1000, "KL3102")
 
-FlipCoilDriverConfigure("lujko1")
+FlipCoilDriverConfigure("lujko1", "134.79.217.161", 22)
 
 ## Load record instances
 #dbLoadRecords("db/xxx.db","user=lujko")

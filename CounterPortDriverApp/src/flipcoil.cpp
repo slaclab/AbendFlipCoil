@@ -17,8 +17,9 @@ FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) 
     0,
     0)
 {
-  //asynStatus status = pasynOctetSyncIO->connect(udp, addr, &pasynUser, 0);
-  asynStatus status = asynSuccess;
+  printf("DId that thing where it tries to connect to the udp thing");
+  asynStatus status = pasynOctetSyncIO->connect(udp, addr, &pasynUser, 0);
+  //asynStatus status = asynSuccess;
   if (status != asynSuccess)
   {
     printf("Failed to connect over udp port\n");
@@ -168,7 +169,7 @@ void FlipCoilDriver::setPortDriver(FlipCoilDriver* portDriver)
 
 extern "C" {
   int FlipCoilDriverConfigure(const char* portName, const char* udp, int addr) {
-
+    printf("Trying to initialize the port driver");
     FlipCoilDriver* temp = new FlipCoilDriver(portName, udp, addr);
     FlipCoilDriver::setPortDriver(temp);
     return asynSuccess;
@@ -176,13 +177,15 @@ extern "C" {
   static const iocshArg FlipCoilArg0 ={"portName", iocshArgString};
   static const iocshArg FlipCoilArg1 ={"udp", iocshArgString};
   static const iocshArg FlipCoilArg2 ={"addr", iocshArgInt};
-  static const iocshArg * const FlipCoilArgs[] = {&FlipCoilArg0, &FlipCoilArg1};
-  static const iocshFuncDef FlipCoilFuncDef = {"FlipCoilDriverConfigure", 4, FlipCoilArgs};
+  static const iocshArg * const FlipCoilArgs[] = {&FlipCoilArg0, &FlipCoilArg1, &FlipCoilArg2};
+  static const iocshFuncDef FlipCoilFuncDef = {"FlipCoilDriverConfigure", 3, FlipCoilArgs};
   static void FlipCoilCallFunc(const iocshArgBuf *args)
   {
+    printf("Do my arguments not exist");
     FlipCoilDriverConfigure(args[0].sval, args[1].sval, args[2].ival);
   }
   void FlipCoilDriverRegister(void) {
+    printf("Successfully registers the driver call function\n\n");
     iocshRegister(&FlipCoilFuncDef, FlipCoilCallFunc);
   }
   epicsExportRegistrar(FlipCoilDriverRegister);
