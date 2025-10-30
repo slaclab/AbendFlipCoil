@@ -7,19 +7,18 @@
 void flipCoilTask(void *driverPointer);
 FlipCoilDriver* FlipCoilDriver::port_driver = nullptr;
 
-FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr): asynPortDriver(
+FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) : asynPortDriver(
     portName,
     1,
-    asynFloat64Mask,
-    asynFloat64Mask,
+    asynFloat64Mask | asynInt32Mask | asynOctetMask | asynDrvUserMask,
+    asynFloat64Mask | asynInt32Mask,
     0,
     1,
     0,
-0
-    )
+    0)
 {
-  asynStatus status = pasynOctetSyncIO->connect(udp, addr, &pasynUser, 0);
-  
+  //asynStatus status = pasynOctetSyncIO->connect(udp, addr, &pasynUser, 0);
+  asynStatus status = asynSuccess;
   if (status != asynSuccess)
   {
     printf("Failed to connect over udp port\n");

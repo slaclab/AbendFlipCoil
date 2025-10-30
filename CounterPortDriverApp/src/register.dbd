@@ -1,5 +1,2 @@
-registrar(CounterDriverRegister)
-registrar(GetterDriverRegister)
-registrar(WaterDriverRegister)
 registrar(FlipCoilDriverRegister)
 registrar(integralCalcRegister)

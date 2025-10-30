@@ -11,5 +11,5 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   asynStatus status = setIntegerParam(pasynUser->reason, value);
   callParamCallbacks();
-  return;
+  return asynSuccess;
 }

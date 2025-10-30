@@ -27,6 +27,7 @@ CounterPortDriver_DBD += register.dbd
 # CounterPortDriver_registerRecordDeviceDriver.cpp derives from CounterPortDriver.dbd
 CounterPortDriver_SRCS += CounterPortDriver_registerRecordDeviceDriver.cpp
 CounterPortDriver_SRCS += flipcoil_util.cpp
+CounterPortDriver_SRCS += asyn_read_write.cpp
 CounterPortDriver_SRCS += flipcoil.cpp
 
 # Build the main IOC entry point on workstation OSs.
