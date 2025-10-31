@@ -22,6 +22,8 @@ CounterPortDriver_registerRecordDeviceDriver pdbbase
 #modbusInterposeConfig("beckhoff", 0, 2000, 0)
 #drvModbusAsynConfigure("BKHF1_3102", "beckhoff", 0,3, 0, 16, 0, 1000, "KL3102")
 
+
+vxi11Configure("lujko1", "137.79.217.161", 0, "5.0", "gpib0", 0, 0)
 FlipCoilDriverConfigure("lujko1", "134.79.217.161", 22)
 
 ## Load record instances
