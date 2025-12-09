@@ -23,14 +23,17 @@ CounterPortDriver_registerRecordDeviceDriver pdbbase
 #drvModbusAsynConfigure("BKHF1_3102", "beckhoff", 0,3, 0, 16, 0, 1000, "KL3102")
 
 
-vxi11Configure("lujko1", "137.79.217.161", 0, "5.0", "gpib0", 0, 0)
-FlipCoilDriverConfigure("lujko1", "134.79.217.161", 22)
+##vxi11Configure("lujko1", "134.79.217.161", 0, "5.0", "gpib0", 0, 0)
+vxi11Configure("lujko1", "gpib-b34-nw01", 0, "5.0", "gpib0", 0, 0)
+asynSetTraceIOMask("lujko1", 22, 0x6)
+asynSetTraceMask("lujko1", 22, 0x9)
+FlipCoilDriverConfigure("lujko", "lujko1", 22)
 
 ## Load record instances
 #dbLoadRecords("db/xxx.db","user=lujko")
 #dbLoadRecords("db/counter.db", "USER=lujko,PORT=lujko,ADDR=0,TIMEOUT=0")
 #dbLoadRecords("db/getter.db", "USER=lujko,PORT=lujko1,ADDR=0,TIMEOUT=0")
-dbLoadRecords("db/flip.db", "P=lujko,PORT=lujko1,ADDR=0,TIMEOUT=0")
+dbLoadRecords("db/flip.db", "P=lujko,PORT=lujko,ADDR=0,TIMEOUT=0")
 #dbLoadRecords("db/tank.db", "USER=lujko,PORT=lujko2,ADDR=0,TIMEOUT=0")
 cd "${TOP}/iocBoot/${IOC}"
 iocInit

@@ -21,7 +21,59 @@ record(ao, "$(P):INTEGRAL_RECEIVER")
 record(calcout, "$(P):SINE_WAVE_GENERATOR")
 {
   field(INPA, "1")
-  field(SCAN, ".1 second")
+  #field(SCAN, ".1 second")
   field(CALC, "3 * sin(2*a); a:=a+D2R")
   field(OUT, "$(P):INTEGRAL_RECEIVER PP")
+  }
+
+record(mbbo, "$(P):MEM_MODE")
+{
+    field(DTYP, "asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))MEM_MODE")
+    field(ZRVL, "0")
+    field(ZRST, "OFF")
+    field(ONVL, "1")
+    field(ONST, "LIFO")
+    field(TWVL, "2")
+    field(TWST, "FIFO")
+  }
+
+record(ao, "$(P):GET_MEM")
+{
+    field(PINI, "0")
+    field(DTYP, "asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))GET_MEM")
+    field(SCAN, "Passive")
+  }
+
+record(ao, "$(P):TRIG_SMPLS")
+{
+    field(PINI, "0")
+    field(DTYP, "asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))NUM_SAMPLES")
+    field(SCAN, "Passive")
+  }
+
+record(ao, "$(P):TRIG_SGL")
+{
+    field(PINI, "0")
+    field(DTYP, "asynFloat64")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))TRIG_SGL")
+    field(SCAN, "Passive")
+  }
+
+record(ao, "$(P):BEEP")
+{
+    field(PINI, "0")
+    field(DTYP, "asynFloat64")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))BEEP")
+    field(SCAN, "Passive")
+  }
+
+record(ai, "$(P):BEEP_RBV")
+{
+    field(PINI, "0")
+    field(DTYP, "asynFloat64")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))BEEP")
+    field(SCAN, "I/O Intr")
   }

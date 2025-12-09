@@ -17,17 +17,51 @@ FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) 
     0,
     0)
 {
-  printf("DId that thing where it tries to connect to the udp thing");
-  asynStatus status = pasynOctetSyncIO->connect(udp, addr, &pasynUser, 0);
-  //asynStatus status = asynSuccess;
+
+  asynStatus status = pasynOctetSyncIO->connect(udp, addr, &pasynUserPort, 0);
+  pasynOctetSyncIO->setInputEos(pasynUserPort, "\r\n", 2);
+  pasynOctetSyncIO->setOutputEos(pasynUserPort, "\r\n", 2);
+  
   if (status != asynSuccess)
   {
-    printf("Failed to connect over udp port\n");
+    printf("\nFailed to connect over udp port %s addr %d\n", udp, addr);
     return;
   }
-  createParam(P_FlipCoilString, asynParamFloat64, &P_FlipCoil);
+  //Doing a fun thing where im just trying to readwrite fun 
 
-  status = (asynStatus)(epicsThreadCreate("LujkoFlipCoilTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::flipCoilTask, this) == NULL);
+  int temp;
+  asynStatus test;
+  sleep(5);
+  test = pasynOctetSyncIO->flush(pasynUserPort);
+  if (test != asynSuccess)
+  {
+    printf("\n\nFailed to flushed the buffer");
+    printf("\n\nError message? %s\n", pasynUserPort->errorMessage);
+  }
+  size_t nBytesOut, nBytesIn;
+  int eomReason;
+  const char * buffer = "ID?\r\n";
+  test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 256, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+
+  if (test != asynSuccess)
+  {
+    printf("\n\n The test write read thing didn't work and who knows why\n\n");
+    printf("\n\nBytes out %ld, bytes in %ld", nBytesOut, nBytesIn);
+    printf("\n\neomReason %d", eomReason);
+    printf("\n\nError message? %s\n", pasynUserPort->errorMessage);
+    printf("\nBuffer:%s\n", buffer);
+    printf("\nCommand Buffer: %s\n", cmdBuffer);
+    printf("\nTest variable: %d\n", test);
+  }
+
+  createParam(P_FlipCoilString, asynParamFloat64, &P_FlipCoil);
+  createParam(P_TrigSglString, asynParamFloat64, &P_TrigSgl);
+  createParam(P_BeepString, asynParamFloat64, &P_Beep);
+  createParam(P_MemModeString, asynParamInt32, &P_MemMode);
+  createParam(P_GetMemString, asynParamInt32, &P_GetMem);
+  createParam(P_TrigSmplString, asynParamInt32, &P_NumSamples);
+
+  //status = (asynStatus)(epicsThreadCreate("LujkoFlipCoilTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::flipCoilTask, this) == NULL);
   if (status)
   {
     printf("Thread shot itself for some reason");

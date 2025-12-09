@@ -20,7 +20,29 @@ CHECK_RELEASE = YES
 #   for a subset of the cross-compiled target architectures
 #   that Base is built for.
 #CROSS_COMPILER_TARGET_ARCHS = vxWorks-ppc32
-CROSS_COMPILER_TARGET_ARCHS = linuxRT-x86_64
+#CROSS_COMPILER_TARGET_ARCHS = linuxRT-x86_64
+CROSS_COMPILER_TARGET_ARCHS = rhel9_x86-64
+
+SHARED_LIBRARIES=NO 
+STATIC_BUILD=YES 
+
+ifdef T_A 
+PKG_ARCH=$(T_A)
+endif
+
+# CPSW
+CPSW_FRAMEWORK_PACKAGE_NAME = cpsw/framework
+CPSW_FRAMEWORK_VERSION      = R4.5.2
+CPSW_FRAMEWORK_TOP          = $(PACKAGE_SITE_TOP)/$(CPSW_FRAMEWORK_PACKAGE_NAME)/$(CPSW_FRAMEWORK_VERSION)
+CPSW_FRAMEWORK_LIB          = $(CPSW_FRAMEWORK_TOP)/$(PKG_ARCH)/lib
+CPSW_FRAMEWORK_INCLUDE      = $(CPSW_FRAMEWORK_TOP)/$(PKG_ARCH)/include
+
+# TIRPC
+TIRPC_PACKAGE_NAME    = tirpc
+TIRPC_VERSION         = 1.3.5
+TIRPC_TOP             = $(PACKAGE_SITE_TOP)/$(TIRPC_PACKAGE_NAME)/$(TIRPC_VERSION)
+TIRPC_LIB             = $(TIRPC_TOP)/$(PKG_ARCH)/lib
+TIRPC_INCLUDE         = $(TIRPC_TOP)/$(PKG_ARCH)/include
 
 # To install files into a location other than $(TOP) define
 #   INSTALL_LOCATION here.
