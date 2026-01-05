@@ -53,7 +53,8 @@ CounterPortDriver_LIBS += $(EPICS_BASE_IOC_LIBS)
 
 #===========================
 
-USR_CPPFLAGS += -std=c++11 -Wall -g
+USR_CXXFLAGS += -std=c++11 -Wall -pthread -ldl -g 
+USR_LDFLAGS += -pthread -ldl -lrt -lreadline -lhistory -lncurses
 
 include $(TOP)/configure/RULES
 #----------------------------------------

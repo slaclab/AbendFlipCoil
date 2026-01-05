@@ -1,1 +1,3 @@
 Proof of function of a bend flipcoil
+
+Fun new behaviour record TRIGGER causes series of commands to be sent to a voltmeter, voltmeter gives us measurements, measurements are plugged into the integral calculation function, the integral calculation is plugged into a field strength calculation which is then returned to the user in either a record or just printed out to the st.cmd i haven't decided at that point.

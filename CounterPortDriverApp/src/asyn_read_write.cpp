@@ -15,6 +15,13 @@ asynStatus FlipCoilDriver::_writeRead(const char* buffer)
   if (nBytesIn > 0)
   {
     printf("\nWe got stuff: %s", cmdBuffer);
+    char* token = strtok(cmdBuffer, "\r\n");
+    vector<float> coil_samples;
+    while (token != NULL)
+    {
+      coil_samples.push_back(strtof(token, nullptr));
+      token = strtok(NULL, "\r\n");
+    }
   }
    //if (status) {
    //    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
@@ -23,6 +30,8 @@ asynStatus FlipCoilDriver::_writeRead(const char* buffer)
    //}
   return(status);
 }
+
+
 
 /*
  * Overridden method for writeInt32 from the asynDriver, we overwrite the method because 
@@ -52,6 +61,7 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
   else if(parameter == P_GetMem)
   {
     sprintf(sendBuffer, "RMEM 1, %d\r\n", num_samples);
+    multimeterTask();
   }
   else if(parameter == P_NumSamples)
   {

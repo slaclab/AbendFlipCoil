@@ -2,6 +2,119 @@
 
 #include "flipcoil_util.h"
 #include "flipcoil.h"
+
+
+void FlipCoilDriver::multimeterTask(void)
+{
+  
+  
+  //blmeasbl measurement
+
+  printf("\n\nMultimeter task");
+  //vector<float> coil_samples;
+  double variable;
+
+  vector<float> coil_samples;
+  double prev = -3;
+  int x = 0;
+
+  getDoubleParam(P_FlipCoil, &prev);
+  getDoubleParam(P_FlipCoil, &variable);
+  while (prev * variable > 0)
+  {
+    prev = variable;
+    getDoubleParam(P_FlipCoil, &variable);
+  }
+  //As soon as we break this loop we're finding the bits we're trying to integrate 
+  vector<float> pos_samples;
+  vector<float> neg_samples;
+  int crossings = 0;
+  const char* buffer = "RMEM 1, 0\r\n";
+  int test;
+  size_t nBytesOut, nBytesIn;
+  int eomReason;
+  while (crossings < 3)
+  {
+    test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 256, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+    
+    if (nBytesIn > 0)
+    {
+      char* token = strtok(cmdBuffer, "\r\n");
+      float prev = stof(token);
+      while (token != NULL)
+      {
+        float variable = stof(token);
+        if (variable * prev < 0)
+        {
+          crossings += 1;
+        }
+        if (crossings == 3)
+        {
+          printf("\n\nGot the sine wave\n\n");
+          break;
+        }
+        if(variable < 0)
+        {
+          neg_samples.push_back(-1 * variable);
+        }
+        else 
+        {
+          pos_samples.push_back(variable);
+        }
+        prev = variable;
+        token = strtok(NULL, "\r\n");
+
+      }
+    }
+  }
+  //Then the time integral is calculated within coil_samples coilintpeak
+  float pos_peak = coilIntPeak(COIL_DELTA, pos_samples);
+  
+  //Third a a time integral of the negative samples is calculated coilintpeak
+  float neg_peak = -1 * coilIntPeak(COIL_DELTA, neg_samples);
+  
+  //Check for forward and reverse half cycles, takes results from coilintpeak 
+  //TODO Figure out why this if statement is necessary
+  printf("Calculated Pos Peak: %f Calculated Neg Peak: %f\n\n", pos_peak, neg_peak);
+  /**
+  if (neg_peak * pos_peak >= 0)
+  {
+   printf("Problems, didn't receive coil voltages most likely");
+    throw runtime_error("Neg_peak * pos_peak returned a positive number or was zero, should be impossible");
+  }
+  **/
+  if (pos_peak > 0 )
+  {
+    vt_pos_mult.push_back(pos_peak);
+    vt_neg_mult.push_back(neg_peak);
+  }
+  else 
+  {
+    vt_neg_mult.push_back(pos_peak);
+    vt_pos_mult.push_back(neg_peak);
+  }
+  vt_avg_mult.push_back((vt_pos_mult.back() - vt_neg_mult.back()) / 2);
+  //printf("Integrated calculation, %g\n", vt_avg[i]);
+  //Finding the mean of integrated voltage values
+  float sum = 0;
+  for(float x : vt_avg_mult)
+  {
+    sum += x;
+  }
+
+  //TODO Pass this by reference? or make the task return this, im not sure what it's used for
+  float avg = sum / vt_avg_mult.size();
+  Avg_Int_Mult.store(avg);
+  printf("\n\n\nAveraged integral %g", avg);
+  //Finding standard deviation
+  sum = 0;
+  for(float x : vt_avg_mult)
+  {
+    sum += pow((x - avg), 2);
+  }
+  float std_dev = sqrt(sum / NUM_MEASUREMENTS);
+}
+
 /**
  * @brief Isolates a the first peak value in a sine wave or similar function
  * modifies passed in start end and peak values to correspond with

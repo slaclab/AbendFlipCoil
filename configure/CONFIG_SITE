@@ -20,8 +20,8 @@ CHECK_RELEASE = YES
 #   for a subset of the cross-compiled target architectures
 #   that Base is built for.
 #CROSS_COMPILER_TARGET_ARCHS = vxWorks-ppc32
-#CROSS_COMPILER_TARGET_ARCHS = linuxRT-x86_64
-CROSS_COMPILER_TARGET_ARCHS = rhel9_x86-64
+CROSS_COMPILER_TARGET_ARCHS = linuxRT-x86_64
+#CROSS_COMPILER_TARGET_ARCHS = rhel9_x86-64
 
 SHARED_LIBRARIES=NO 
 STATIC_BUILD=YES 

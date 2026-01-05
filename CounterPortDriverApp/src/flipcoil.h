@@ -5,6 +5,7 @@
 #include <memory>
 #include <functional>
 #include <map>
+#include <string>
 
 #include <iocsh.h>
 #include <string.h>
@@ -43,9 +44,11 @@ class FlipCoilDriver : public asynPortDriver {
   public:
     FlipCoilDriver(const char *portName, const char *udp, int addr);
     void flipCoilTask(void);
+    void multimeterTask(void);
     static FlipCoilDriver* getPortDriver();
     static void setPortDriver(FlipCoilDriver* portDriver);
     atomic<float> Avg_Int;
+    atomic<float> Avg_Int_Mult;
     virtual asynStatus _writeRead(const char* buffer);
     virtual asynStatus writeInt32(asynUser *pasynUser, epicsInt32 value);
     virtual asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
@@ -65,10 +68,13 @@ class FlipCoilDriver : public asynPortDriver {
     int P_NumSamples;
 
     int num_samples;
+    vector<float> vt_pos_mult;
+    vector<float> vt_neg_mult;
+    vector<float> vt_avg_mult;
     
   private:
     static FlipCoilDriver* port_driver;
     asynUser *pasynUserPort;
-    char cmdBuffer[256];
+    char cmdBuffer[512];
     char sendBuffer[256];
 };
