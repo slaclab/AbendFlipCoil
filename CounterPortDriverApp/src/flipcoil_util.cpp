@@ -2,7 +2,7 @@
 
 #include "flipcoil_util.h"
 #include "flipcoil.h"
-
+#include<unistd.h>
 
 void FlipCoilDriver::multimeterTask(void)
 {
@@ -29,23 +29,27 @@ void FlipCoilDriver::multimeterTask(void)
   vector<float> pos_samples;
   vector<float> neg_samples;
   int crossings = 0;
-  const char* buffer = "RMEM 1, 0\r\n";
+  const char* buffer = "RMEM 1,256\r\n";
   int test;
   size_t nBytesOut, nBytesIn;
   int eomReason;
   while (crossings < 3)
   {
-    test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 256, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+    sleep(1);
+    test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 2048, 5.0, &nBytesOut, &nBytesIn, &eomReason);
     
     if (nBytesIn > 0)
     {
-      char* token = strtok(cmdBuffer, "\r\n");
+      printf("\nWe got stuff: %s", cmdBuffer);
+      char* token = strtok(cmdBuffer, ",");
       float prev = stof(token);
       while (token != NULL)
       {
         float variable = stof(token);
+        printf("the tokenized things we've got; %f, %f\n", prev, variable);
         if (variable * prev < 0)
         {
+          printf("\nFound a zero crossing, %f, %f\n", variable, prev);
           crossings += 1;
         }
         if (crossings == 3)
@@ -62,7 +66,7 @@ void FlipCoilDriver::multimeterTask(void)
           pos_samples.push_back(variable);
         }
         prev = variable;
-        token = strtok(NULL, "\r\n");
+        token = strtok(NULL, ",");
 
       }
     }
@@ -175,6 +179,7 @@ float coilIntPeak(float coil_delta, vector<float> voltage_samples)
   float to_ret = 0;
   for(int i = 0; i < voltage_samples.size(); i++)
   {
+    printf("Samples, %d\n", voltage_samples[i]);
     if(voltage_samples[i] < 0)
     {
       continue;

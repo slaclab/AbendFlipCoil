@@ -42,6 +42,7 @@ FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) 
   int eomReason;
   const char * buffer = "ID?\r\n";
   test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 256, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+  //_writeRead("CLEAR");
 
   if (test != asynSuccess)
   {

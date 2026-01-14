@@ -39,7 +39,7 @@ using namespace std;
 
 #define NUM_MEASUREMENTS 4
 #define COIL_SAMPLES 100
-#define COIL_DELTA 0.019
+#define COIL_DELTA 0.004
 class FlipCoilDriver : public asynPortDriver {
   public:
     FlipCoilDriver(const char *portName, const char *udp, int addr);
@@ -75,6 +75,6 @@ class FlipCoilDriver : public asynPortDriver {
   private:
     static FlipCoilDriver* port_driver;
     asynUser *pasynUserPort;
-    char cmdBuffer[512];
+    char cmdBuffer[2048];
     char sendBuffer[256];
 };

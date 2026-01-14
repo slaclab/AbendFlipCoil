@@ -9,7 +9,7 @@ asynStatus FlipCoilDriver::_writeRead(const char* buffer)
   int test;
   size_t nBytesOut, nBytesIn;
   int eomReason;
-  test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 256, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+  test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 2048, 5.0, &nBytesOut, &nBytesIn, &eomReason);
    //printf("%s::%s: status=%d, buffer=%s, nbytesTrans=%d\n", driverName, 
    //    functionName, status, buffer, (int)nbytesTransfered);
   if (nBytesIn > 0)
@@ -60,13 +60,21 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
   }
   else if(parameter == P_GetMem)
   {
-    sprintf(sendBuffer, "RMEM 1, %d\r\n", num_samples);
+    //sprintf(sendBuffer, "RMEM 1, %d\r\n", num_samples);
+    _writeRead("FUNC DCV");
+    _writeRead("RANGE AUTO");
+    _writeRead("TARM AUTO");
+    _writeRead("TIMER 40E-4");
+    _writeRead("NPLC 0.02");
+    _writeRead("NRDGS 256");
+    _writeRead("TRIG TIMER");
+    _writeRead("ARM");
     multimeterTask();
   }
   else if(parameter == P_NumSamples)
   {
     num_samples = value;
-    sprintf(sendBuffer, "NRDGS %d, AUTO\r\n", num_samples);
+    sprintf(sendBuffer, "NRDGS %d, TIMER\r\n", num_samples);
   }
 
   if(strlen(sendBuffer) > 0)
