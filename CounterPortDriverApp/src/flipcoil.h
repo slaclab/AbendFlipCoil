@@ -34,12 +34,13 @@ using namespace std;
 #define P_TrigSlopeString "TRIG_SLOPE"
 #define P_TrigLevelString "TRIG_LEVEL"
 #define P_BeepString "BEEP"
+#define P_RmemString "RMEM"
 
 
 
 #define NUM_MEASUREMENTS 4
 #define COIL_SAMPLES 100
-#define COIL_DELTA 0.004
+#define COIL_DELTA 1 
 class FlipCoilDriver : public asynPortDriver {
   public:
     FlipCoilDriver(const char *portName, const char *udp, int addr);
@@ -66,6 +67,7 @@ class FlipCoilDriver : public asynPortDriver {
     int P_TrigSgl;
     int P_Beep;
     int P_NumSamples;
+    int P_Rmem;
 
     int num_samples;
     vector<float> vt_pos_mult;
@@ -75,6 +77,6 @@ class FlipCoilDriver : public asynPortDriver {
   private:
     static FlipCoilDriver* port_driver;
     asynUser *pasynUserPort;
-    char cmdBuffer[2048];
+    char cmdBuffer[8192];
     char sendBuffer[256];
 };

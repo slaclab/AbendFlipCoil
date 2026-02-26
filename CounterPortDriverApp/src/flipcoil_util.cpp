@@ -3,6 +3,7 @@
 #include "flipcoil_util.h"
 #include "flipcoil.h"
 #include<unistd.h>
+#include <sstream>
 
 void FlipCoilDriver::multimeterTask(void)
 {
@@ -29,22 +30,38 @@ void FlipCoilDriver::multimeterTask(void)
   vector<float> pos_samples;
   vector<float> neg_samples;
   int crossings = 0;
-  const char* buffer = "RMEM 1,256\r\n";
+  char* buffer = "READ\r\n";
   int test;
   size_t nBytesOut, nBytesIn;
   int eomReason;
   while (crossings < 3)
   {
-    sleep(1);
+    sleep(100);
+    buffer = "MEM CLR\r\n";
+    pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 2048, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+    buffer = "READ\r\n";
     test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 2048, 5.0, &nBytesOut, &nBytesIn, &eomReason);
-    
+
+    //printf("THe bytes we received: %d", nBytesIn);
     if (nBytesIn > 0)
     {
-      printf("\nWe got stuff: %s", cmdBuffer);
-      char* token = strtok(cmdBuffer, ",");
-      float prev = stof(token);
+      //printf("\nWe got stuff: %s", cmdBuffer);
+      string s(cmdBuffer);
+      stringstream ss(s);
+      string tok;
+      //while(getline(ss, tok, '\n'))
+      //{
+        //printf("Don't segfault %s", tok);
+      //}
+      char* token = strtok(cmdBuffer, "\r\n");
+      printf("\nStupid token %s", token);
+      if (token != NULL)
+      {
+        float prev = stof(token);
+      }
       while (token != NULL)
       {
+        printf("\n The really really stupid token %s", token);
         float variable = stof(token);
         printf("the tokenized things we've got; %f, %f\n", prev, variable);
         if (variable * prev < 0)
@@ -66,10 +83,14 @@ void FlipCoilDriver::multimeterTask(void)
           pos_samples.push_back(variable);
         }
         prev = variable;
-        token = strtok(NULL, ",");
+        token = strtok(NULL, "\r\n");
 
       }
     }
+  }
+  for (float x: pos_samples)
+  {
+    printf("\nSanity checking pos samples vector: %f", x);
   }
   //Then the time integral is calculated within coil_samples coilintpeak
   float pos_peak = coilIntPeak(COIL_DELTA, pos_samples);
@@ -169,7 +190,7 @@ void peakIsolator(int& start, int& end, int& peak, vector<float> samples)
  * @param voltage_samples sampled voltages
  * @return Calculated integral of the voltage 
  */
-float coilIntPeak(float coil_delta, vector<float> voltage_samples)
+float coilIntPeak(float coil_delta, vector<float> &voltage_samples)
 {
 
   //So the original way was a little bit weird
@@ -177,9 +198,13 @@ float coilIntPeak(float coil_delta, vector<float> voltage_samples)
   //Rather than mix and match 3 different integrals
   //printf("\n\n\n\n\n");
   float to_ret = 0;
+  for(float y: voltage_samples)
+  {
+    printf("\nStupid sample values, %f", y);
+  }
   for(int i = 0; i < voltage_samples.size(); i++)
   {
-    printf("Samples, %d\n", voltage_samples[i]);
+    printf("Sample, %d, %f\n", i, voltage_samples[i]);
     if(voltage_samples[i] < 0)
     {
       continue;
@@ -196,6 +221,7 @@ float coilIntPeak(float coil_delta, vector<float> voltage_samples)
 
   }
   //printf("\n\n\n\n\n\n");
+  printf("\n\nCalculated integral to return, %f, coil delta %f", to_ret, coil_delta);
   
   return (coil_delta / 2) * to_ret;
 }

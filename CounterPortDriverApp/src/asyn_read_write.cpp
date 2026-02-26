@@ -2,6 +2,7 @@
 
 #include "flipcoil_util.h"
 #include "flipcoil.h"
+#include <unistd.h>
 //FlipCoilDriver* FlipCoilDriver::_write = nullptr;
 asynStatus FlipCoilDriver::_writeRead(const char* buffer)
 {
@@ -9,12 +10,12 @@ asynStatus FlipCoilDriver::_writeRead(const char* buffer)
   int test;
   size_t nBytesOut, nBytesIn;
   int eomReason;
-  test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 2048, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+  test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 8192, 5.0, &nBytesOut, &nBytesIn, &eomReason);
    //printf("%s::%s: status=%d, buffer=%s, nbytesTrans=%d\n", driverName, 
    //    functionName, status, buffer, (int)nbytesTransfered);
   if (nBytesIn > 0)
   {
-    printf("\nWe got stuff: %s", cmdBuffer);
+    printf("\nWe got stuff: %s, NumBytesIn: %d", cmdBuffer, nBytesIn);
     char* token = strtok(cmdBuffer, "\r\n");
     vector<float> coil_samples;
     while (token != NULL)
@@ -28,6 +29,7 @@ asynStatus FlipCoilDriver::_writeRead(const char* buffer)
    //      "%s::%s: Error: buffer=%s, status=%d, nbytesTransfered=%d\n",
    //      driverName, functionName, buffer, status, (int)nbytesTransfered);
    //}
+  printf("\neomReason: %d", eomReason);
   return(status);
 }
 
@@ -61,15 +63,67 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
   else if(parameter == P_GetMem)
   {
     //sprintf(sendBuffer, "RMEM 1, %d\r\n", num_samples);
+    /**
+    _writeRead("END ALWAYS");
     _writeRead("FUNC DCV");
     _writeRead("RANGE AUTO");
     _writeRead("TARM AUTO");
-    _writeRead("TIMER 40E-4");
+    _writeRead("TIMER 1E0");
     _writeRead("NPLC 0.02");
-    _writeRead("NRDGS 256");
+    _writeRead("NRDGS 1");
     _writeRead("TRIG TIMER");
     _writeRead("ARM");
-    multimeterTask();
+    **/
+    //_writeRead("PRESET NORM");
+    /**
+    _writeRead("ABORT\r\n");
+    _writeRead("MCOUNT?\r\n");
+    _writeRead("MEM CLR\r\n");
+    
+    asynStatus test = pasynOctetSyncIO->flush(pasynUserPort);
+    if (test != asynSuccess)
+    {
+      printf("\n\nFailed to flushed the buffer");
+      printf("\n\nError message? %s\n", pasynUserPort->errorMessage);
+    }
+    
+    _writeRead("MEM FIFO\r\n");
+    _writeRead("TARM AUTO\r\n");
+    //_writeRead("FUNC DCV");//chatgpt
+    //_writeRead("NPLC 1");//chatgpt
+    //_writeRead("NRDGS 5, TIMER\r\n");
+    //_writeRead("TIMER 1\r\n");
+    _writeRead("NRDGS 5\r\n");
+    _writeRead("TIMER 1\r\n");
+    _writeRead("TRIG TIMER\r\n");
+
+    _writeRead("ARM\r\n");
+    sleep(10);
+    //_writeRead("ID?");
+    _writeRead("MCOUNT?\r\n");
+    //_writeRead("RMEM 1,5\r\n");
+
+    //_writeRead("MCOUNT?");
+    **/ 
+    //Gemini time lol fuck me i hate this 
+    _writeRead("PRESET NORM\r\n");
+    _writeRead("END ALWAYS\r\n");
+    _writeRead("ID?");
+    //_writeRead("TARM HOLD\r\n"); // might be useless
+    _writeRead("TRIG HOLD\r\n");
+    _writeRead("MEM FIFO\r\n");
+    _writeRead("NPLC 10\r\n");
+    _writeRead("NRDGS 5, TIMER\r\n");
+    _writeRead("TIMER 3\r\n");
+    _writeRead("MCOUNT?\r\n");
+    _writeRead("TRIG SGL\r\n");
+    sleep(17);
+    printf("\n\nAfter sleep, should try rmem");
+    _writeRead("MCOUNT?\r\n");
+    _writeRead("ERRSTR?\r\n");
+    //_writeRead("END OFF\r\n");
+    //_writeRead("RMEM 1,5\r\n");
+    //multimeterTask();
   }
   else if(parameter == P_NumSamples)
   {
@@ -101,13 +155,33 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   int parameter = pasynUser->reason;
   sprintf(sendBuffer, "");
 
+  if (parameter == P_Rmem)
+  {
+    size_t nBytesOut, nBytesIn;
+    int eomReason;
+    printf("\n\nThe value we wrote was %f", value);
+    pasynOctetSyncIO->flush(pasynUserPort);
+    pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,5\r\n", 8, 5.0, &nBytesOut);
+
+    for (int i = 0; i < 5; i++)
+    {
+      asynStatus status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, 8192, 5.0, &nBytesIn, &eomReason);
+      printf("\nBuffer: %s, eomReason %d", cmdBuffer, eomReason);
+    }
+  }
+
   if (parameter == P_Beep)
   {
     sprintf(sendBuffer, "BEEP\r\n");
   }
   else if (parameter == P_TrigSgl)
   {
-    sprintf(sendBuffer, "TRIG SGL\r\n");
+    //sprintf(sendBuffer, "TRIG SGL\r\n");
+    _writeRead("MEM CLR\r\n");
+    _writeRead("MCOUNT?\r\n");
+    _writeRead("TRIG SGL\r\n");
+    sleep(17);
+    _writeRead("MCOUNT?\r\n");
   }
 
   if(strlen(sendBuffer) > 0)

@@ -62,6 +62,14 @@ record(ao, "$(P):TRIG_SGL")
     field(SCAN, "Passive")
   }
 
+record(ao, "$(P):RMEM")
+{
+    field(PINI, "0")
+    field(DTYP, "asynFloat64")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))RMEM")
+    field(SCAN, "Passive")
+  }
+
 record(ao, "$(P):BEEP")
 {
     field(PINI, "0")
