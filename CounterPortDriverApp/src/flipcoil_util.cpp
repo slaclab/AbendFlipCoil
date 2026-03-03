@@ -23,12 +23,9 @@ void FlipCoilDriver::multimeterTask(void)
   _writeRead("NRDGS 120, TIMER\r\n");
   _writeRead("TIMER 1\r\n");
 
-
-  //vector<float> coil_samples;
-  double variable;
-
+  float variable;
   vector<float> coil_samples;
-  double prev = 0;
+  float prev = 0;
   int x = 0;
 
   getDoubleParam(P_FlipCoil, &prev);
@@ -61,46 +58,31 @@ void FlipCoilDriver::multimeterTask(void)
         printf("Multimeter read errored for some reason please retry\n");
         return;
       }
-      
-      
-      
-    }
-      if (nBytesIn > 0)
+      char * token = strtok(cmdBuffer, ",");
+      float reading = stof(token);
+      if (reading * prev < 0)
       {
-      char* token = strtok(cmdBuffer, "\r\n");
-      printf("\nStupid token %s", token);
-      if (token != NULL)
-      {
-        float prev = stof(token);
+        crossings += 1;
       }
-      while (token != NULL)
+      if (crossings == 3)
       {
-        printf("\n The really really stupid token %s", token);
-        float variable = stof(token);
-        printf("the tokenized things we've got; %f, %f\n", prev, variable);
-        if (variable * prev < 0)
+        printf("\nAcquired complete sine wave");
+        break;
+      }
+      if (crossings > 0)
+      {
+        if (reading < 0)
         {
-          printf("\nFound a zero crossing, %f, %f\n", variable, prev);
-          crossings += 1;
-        }
-        if (crossings == 3)
-        {
-          printf("\n\nGot the sine wave\n\n");
-          break;
-        }
-        if(variable < 0)
-    {
           neg_samples.push_back(-1 * variable);
         }
         else 
         {
           pos_samples.push_back(variable);
         }
-        prev = variable;
-        token = strtok(NULL, "\r\n");
-
       }
+      prev = reading;
     }
+
   }
   for (float x: pos_samples)
   {
