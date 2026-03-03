@@ -12,11 +12,23 @@ void FlipCoilDriver::multimeterTask(void)
   //blmeasbl measurement
 
   printf("\n\nMultimeter task");
+  /**
+   * Setup for the multimeter section
+  **/ 
+  _writeRead("PRESET NORM\r\n");
+  _writeRead("END ALWAYS\r\n");
+  _writeRead("TRIG HOLD\r\n");
+  _writeRead("MEM FIFO\r\n");
+  _writeRead("NPLC 10\r\n");
+  _writeRead("NRDGS 120, TIMER\r\n");
+  _writeRead("TIMER 1\r\n");
+
+
   //vector<float> coil_samples;
   double variable;
 
   vector<float> coil_samples;
-  double prev = -3;
+  double prev = 0;
   int x = 0;
 
   getDoubleParam(P_FlipCoil, &prev);
@@ -30,29 +42,31 @@ void FlipCoilDriver::multimeterTask(void)
   vector<float> pos_samples;
   vector<float> neg_samples;
   int crossings = 0;
-  char* buffer = "READ\r\n";
   int test;
   size_t nBytesOut, nBytesIn;
   int eomReason;
   while (crossings < 3)
   {
-    sleep(100);
-    buffer = "MEM CLR\r\n";
-    pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 2048, 5.0, &nBytesOut, &nBytesIn, &eomReason);
-    buffer = "READ\r\n";
-    test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 2048, 5.0, &nBytesOut, &nBytesIn, &eomReason);
+    _writeRead("TRIG SGL\r\n");
+    pasynOctetSyncIO->flush(pasynUserPort);
+    pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,120;\r\n", 11, 5.0, &nBytesOut);
+    
 
     //printf("THe bytes we received: %d", nBytesIn);
-    if (nBytesIn > 0)
+    for (int i = 0; i < 120; i++)
     {
-      //printf("\nWe got stuff: %s", cmdBuffer);
-      string s(cmdBuffer);
-      stringstream ss(s);
-      string tok;
-      //while(getline(ss, tok, '\n'))
-      //{
-        //printf("Don't segfault %s", tok);
-      //}
+      asynStatus read_status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, 8192, 5.0, &nBytesIn, &eomReason);
+      if (read_status != asynSuccess)
+      {
+        printf("Multimeter read errored for some reason please retry\n");
+        return;
+      }
+      
+      
+      
+    }
+      if (nBytesIn > 0)
+      {
       char* token = strtok(cmdBuffer, "\r\n");
       printf("\nStupid token %s", token);
       if (token != NULL)
@@ -75,7 +89,7 @@ void FlipCoilDriver::multimeterTask(void)
           break;
         }
         if(variable < 0)
-        {
+    {
           neg_samples.push_back(-1 * variable);
         }
         else 
