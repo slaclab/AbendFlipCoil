@@ -111,7 +111,7 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     _writeRead("ID?");
     //_writeRead("TARM HOLD\r\n"); // might be useless
     _writeRead("TRIG HOLD\r\n");
-    _writeRead("MEM FIFO\r\n");
+    _writeRead("MEM LIFO\r\n");
     _writeRead("NPLC 10\r\n");
     _writeRead("NRDGS 5, TIMER\r\n");
     _writeRead("TIMER 3\r\n");
@@ -166,8 +166,10 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     for (int i = 0; i < 5; i++)
     {
       asynStatus status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, 8192, 5.0, &nBytesIn, &eomReason);
-      printf("\nBuffer: %s, eomReason %d", cmdBuffer, eomReason);
+      printf("\nBuffer: %s, eomReason %d, nBytesIn, %d", cmdBuffer, eomReason, nBytesIn);
     }
+    //pasynOctetSyncIO->write(pasynUserPort, "MEM CONT\r\n", 8, 5.0, &nBytesOut); #THIS WORKS LIKE ID EXPECT FOR ONCE
+    pasynOctetSyncIO->write(pasynUserPort, "MEM FIFO\r\n", 8, 5.0, &nBytesOut);
   }
 
   if (parameter == P_Beep)
@@ -177,8 +179,9 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   else if (parameter == P_TrigSgl)
   {
     //sprintf(sendBuffer, "TRIG SGL\r\n");
-    _writeRead("MEM CLR\r\n");
+    //_writeRead("MEM CLR\r\n");
     _writeRead("MCOUNT?\r\n");
+    //_writeRead("TARM SGL\r\n");
     _writeRead("TRIG SGL\r\n");
     sleep(17);
     _writeRead("MCOUNT?\r\n");
