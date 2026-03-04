@@ -64,7 +64,7 @@ FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) 
   createParam(P_TrigSmplString, asynParamInt32, &P_NumSamples);
 
 
-  //status = (asynStatus)(epicsThreadCreate("LujkoFlipCoilTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::flipCoilTask, this) == NULL);
+  status = (asynStatus)(epicsThreadCreate("LujkoFlipCoilTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::flipCoilTask, this) == NULL);
   if (status)
   {
     printf("Thread shot itself for some reason");
@@ -75,7 +75,8 @@ FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) 
 void flipCoilTask(void *driverPointer)
 {
   FlipCoilDriver *pPvt = (FlipCoilDriver *) driverPointer;
-  pPvt->flipCoilTask();
+  //pPvt->flipCoilTask();
+  pPvt->multimeterTask();
 }
 
 void FlipCoilDriver::flipCoilTask(void)

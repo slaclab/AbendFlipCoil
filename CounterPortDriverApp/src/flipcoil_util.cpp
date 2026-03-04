@@ -20,7 +20,7 @@ void FlipCoilDriver::multimeterTask(void)
   _writeRead("TRIG HOLD\r\n");
   _writeRead("MEM FIFO\r\n");
   _writeRead("NPLC 10\r\n");
-  _writeRead("NRDGS 120, TIMER\r\n");
+  _writeRead("NRDGS 170, TIMER\r\n");
   _writeRead("TIMER 1\r\n");
 
   float variable;
@@ -28,13 +28,6 @@ void FlipCoilDriver::multimeterTask(void)
   float prev = 0;
   int x = 0;
 
-  getDoubleParam(P_FlipCoil, &prev);
-  getDoubleParam(P_FlipCoil, &variable);
-  while (prev * variable > 0)
-  {
-    prev = variable;
-    getDoubleParam(P_FlipCoil, &variable);
-  }
   //As soon as we break this loop we're finding the bits we're trying to integrate 
   vector<float> pos_samples;
   vector<float> neg_samples;
@@ -45,12 +38,13 @@ void FlipCoilDriver::multimeterTask(void)
   while (crossings < 3)
   {
     _writeRead("TRIG SGL\r\n");
+    sleep(172);
     pasynOctetSyncIO->flush(pasynUserPort);
-    pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,120;\r\n", 11, 5.0, &nBytesOut);
+    pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,170;\r\n", 11, 5.0, &nBytesOut);
     
 
     //printf("THe bytes we received: %d", nBytesIn);
-    for (int i = 0; i < 120; i++)
+    for (int i = 0; i < 170; i++)
     {
       asynStatus read_status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, 8192, 5.0, &nBytesIn, &eomReason);
       if (read_status != asynSuccess)
@@ -60,6 +54,7 @@ void FlipCoilDriver::multimeterTask(void)
       }
       char * token = strtok(cmdBuffer, ",");
       float reading = stof(token);
+      printf("Reading: %f, Reading No. %d\n", reading, i);
       if (reading * prev < 0)
       {
         crossings += 1;
@@ -82,8 +77,11 @@ void FlipCoilDriver::multimeterTask(void)
       }
       prev = reading;
     }
+    pasynOctetSyncIO->write(pasynUserPort, "MEM LIFO\r\n", 8, 5.0, &nBytesOut);
 
   }
+  //TODO Remove the return, start doing the integration again
+  return;
   for (float x: pos_samples)
   {
     printf("\nSanity checking pos samples vector: %f", x);
