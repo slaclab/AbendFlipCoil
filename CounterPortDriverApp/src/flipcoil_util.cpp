@@ -188,12 +188,6 @@ float coilIntPeak(float coil_delta, vector<float> &voltage_samples)
   //Rather than mix and match 3 different integrals
   //printf("\n\n\n\n\n");
   float to_ret = 0;
-  /**
-  for(float y: voltage_samples)
-  {
-    printf("\nStupid sample values, %f", y);
-  }
-  **/
   for(int i = 0; i < voltage_samples.size(); i++)
   {
     printf("Sample, %d, %f\n", i, voltage_samples[i]);
@@ -212,12 +206,16 @@ float coilIntPeak(float coil_delta, vector<float> &voltage_samples)
     }
 
   }
-  //printf("\n\n\n\n\n\n");
   printf("\n\nCalculated integral to return, %f, coil delta %f", to_ret, coil_delta);
   
   return (coil_delta / 2) * to_ret;
 }
 
+/**
+ * @brief Generates a sine wave stored in coil_samples.
+ *
+ * @param coil_samples: vector that generated values of a sine wave can be placed
+ **/
 void sineWaveTester(vector<float>& coil_samples)
 {
   //Do something in here that inserts a sine wave at some point
