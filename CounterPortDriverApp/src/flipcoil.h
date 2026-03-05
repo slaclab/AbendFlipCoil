@@ -31,8 +31,8 @@ using namespace std;
 //Important user defined parameters
 #define P_TrigSmplString "NUM_SAMPLES"
 #define P_TimerGapString "TIMER_GAP"
-
-
+#define P_MultiTaskString "MULTI_TASK"
+#define P_RepeatString "REPEATS"
 
 
 #define P_TrigModeString "TRIG_MODE"
@@ -44,8 +44,7 @@ using namespace std;
 
 
 #define NUM_MEASUREMENTS 4
-#define COIL_SAMPLES 100
-#define COIL_DELTA 1 
+
 class FlipCoilDriver : public asynPortDriver {
   public:
     FlipCoilDriver(const char *portName, const char *udp, int addr);

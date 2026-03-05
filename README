@@ -1,3 +1,9 @@
-Proof of function of a bend flipcoil
+Fun AsynPortDriver for communicating with hp3458a multimeter
 
-Fun new behaviour record TRIGGER causes series of commands to be sent to a voltmeter, voltmeter gives us measurements, measurements are plugged into the integral calculation function, the integral calculation is plugged into a field strength calculation which is then returned to the user in either a record or just printed out to the st.cmd i haven't decided at that point.
+Series of PV's are available to the operator to take readings from the multimeter and calculate
+a field strength based on the acquired measurements.
+
+TIMER 
+NUM SAMPLES 
+MULTI TASK 
+REPEASTS

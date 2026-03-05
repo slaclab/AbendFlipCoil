@@ -43,7 +43,7 @@ void FlipCoilDriver::multimeterTask(void)
     _writeRead("TRIG SGL\r\n"); //Command triggers the multimeter to begin readings 
     sleep(172); //TODO: define this based on user provided Timer time 
     pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,170;\r\n", 11, 5.0, &nBytesOut); //Command that tells the multimeter to send it's readings over gpib to us 
-    
+    x
     //For loop that retrieves readings from the multimeter TODO: Define this on user provided num samples.
     for (int i = 0; i < 170; i++)
     {
@@ -65,14 +65,13 @@ void FlipCoilDriver::multimeterTask(void)
       {
         crossings += 1;
       }
-      if (crossings == 3)
+      if (crossings >= 3)
       {
-        asynPrint(pasynUserPort, ASYN_TRACE_FLOW, "Read complete waveform, leaving while loop\n");
-        break;
+        asynPrint(pasynUserPort, ASYN_TRACE_FLOW, "Read complete cycle\n");
+        continue;
       }
-
       //Check we've found at least one zero crossing before storing data, if we haven't this reading's cycle will be incomplete.
-      if (crossings > 0)
+      else if (crossings > 0)
       {
         if (reading < 0)
         {
