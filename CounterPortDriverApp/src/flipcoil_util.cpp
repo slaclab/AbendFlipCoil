@@ -51,14 +51,14 @@ void FlipCoilDriver::multimeterTask(void)
       asynStatus read_status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, 8192, 5.0, &nBytesIn, &eomReason);
       if (read_status != asynSuccess)
       {
-        asynPrint(pasynUserPort, ASYN_TRACE_ERROR, "Unable to read from multimeter, please restart thread and multimeter, error message: %s\n", pasynUser->errorMessage);
+        asynPrint(pasynUserPort, ASYN_TRACE_ERROR, "Unable to read from multimeter, please restart thread and multimeter, error message: %s\n", pasynUserPort->errorMessage);
         return;
       }
 
       //process the readings, strip the comma, convert to a float 
       char * token = strtok(cmdBuffer, ",");
       float reading = stof(token);
-      asynPrint(pasynUserPort, ASYN_TRACE_FLOW, "Reading: %f, reading no: %d, crossing: %d\n", reading, i, crossing);
+      asynPrint(pasynUserPort, ASYN_TRACE_FLOW, "Reading: %f, reading no: %d, crossing: %d\n", reading, i, crossings);
       
       //Check for a zero crossing, basically pos * neg = neg so anytime current reading * prev reading < 0 we've got a zero crossing 
       if (reading * prev < 0)

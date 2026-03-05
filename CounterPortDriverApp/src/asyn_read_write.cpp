@@ -62,54 +62,9 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
   }
   else if(parameter == P_GetMem)
   {
-    //sprintf(sendBuffer, "RMEM 1, %d\r\n", num_samples);
-    /**
-    _writeRead("END ALWAYS");
-    _writeRead("FUNC DCV");
-    _writeRead("RANGE AUTO");
-    _writeRead("TARM AUTO");
-    _writeRead("TIMER 1E0");
-    _writeRead("NPLC 0.02");
-    _writeRead("NRDGS 1");
-    _writeRead("TRIG TIMER");
-    _writeRead("ARM");
-    **/
-    //_writeRead("PRESET NORM");
-    /**
-    _writeRead("ABORT\r\n");
-    _writeRead("MCOUNT?\r\n");
-    _writeRead("MEM CLR\r\n");
-    
-    asynStatus test = pasynOctetSyncIO->flush(pasynUserPort);
-    if (test != asynSuccess)
-    {
-      printf("\n\nFailed to flushed the buffer");
-      printf("\n\nError message? %s\n", pasynUserPort->errorMessage);
-    }
-    
-    _writeRead("MEM FIFO\r\n");
-    _writeRead("TARM AUTO\r\n");
-    //_writeRead("FUNC DCV");//chatgpt
-    //_writeRead("NPLC 1");//chatgpt
-    //_writeRead("NRDGS 5, TIMER\r\n");
-    //_writeRead("TIMER 1\r\n");
-    _writeRead("NRDGS 5\r\n");
-    _writeRead("TIMER 1\r\n");
-    _writeRead("TRIG TIMER\r\n");
-
-    _writeRead("ARM\r\n");
-    sleep(10);
-    //_writeRead("ID?");
-    _writeRead("MCOUNT?\r\n");
-    //_writeRead("RMEM 1,5\r\n");
-
-    //_writeRead("MCOUNT?");
-    **/ 
-    //Gemini time lol fuck me i hate this 
     _writeRead("PRESET NORM\r\n");
     _writeRead("END ALWAYS\r\n");
     _writeRead("ID?");
-    //_writeRead("TARM HOLD\r\n"); // might be useless
     _writeRead("TRIG HOLD\r\n");
     _writeRead("MEM LIFO\r\n");
     _writeRead("NPLC 10\r\n");
@@ -121,9 +76,6 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     printf("\n\nAfter sleep, should try rmem");
     _writeRead("MCOUNT?\r\n");
     _writeRead("ERRSTR?\r\n");
-    //_writeRead("END OFF\r\n");
-    //_writeRead("RMEM 1,5\r\n");
-    //multimeterTask();
   }
   else if(parameter == P_NumSamples)
   {
