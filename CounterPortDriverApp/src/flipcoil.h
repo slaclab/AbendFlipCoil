@@ -26,7 +26,12 @@ using namespace std;
 #define P_TrigSglString "TRIG_SGL"
 #define P_MemModeString "MEM_MODE"
 #define P_GetMemString "GET_MEM"
+
+
+//Important user defined parameters
 #define P_TrigSmplString "NUM_SAMPLES"
+#define P_TimerGapString "TIMER_GAP"
+
 
 
 
