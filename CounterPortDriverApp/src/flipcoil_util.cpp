@@ -11,11 +11,14 @@ void FlipCoilDriver::multimeterTask(void)
   
   //blmeasbl measurement
 
+  pasynOctetSyncIO->flush(pasynUserPort);
   printf("\n\nMultimeter task");
   /**
    * Setup for the multimeter section
   **/ 
   _writeRead("PRESET NORM\r\n");
+  _writeRead("MSIZE?\r\n");
+
   _writeRead("END ALWAYS\r\n");
   _writeRead("TRIG HOLD\r\n");
   _writeRead("MEM FIFO\r\n");
@@ -54,7 +57,7 @@ void FlipCoilDriver::multimeterTask(void)
       }
       char * token = strtok(cmdBuffer, ",");
       float reading = stof(token);
-      printf("Reading: %f, Reading No. %d\n", reading, i);
+      printf("Reading: %f, Reading No. %d, Crossing #%d\n", reading, i, crossings);
       if (reading * prev < 0)
       {
         crossings += 1;
@@ -68,20 +71,20 @@ void FlipCoilDriver::multimeterTask(void)
       {
         if (reading < 0)
         {
-          neg_samples.push_back(-1 * variable);
+          neg_samples.push_back(-1 * reading);
         }
         else 
         {
-          pos_samples.push_back(variable);
+          pos_samples.push_back(reading);
         }
       }
       prev = reading;
     }
-    pasynOctetSyncIO->write(pasynUserPort, "MEM LIFO\r\n", 8, 5.0, &nBytesOut);
+    pasynOctetSyncIO->write(pasynUserPort, "MEM FIFO\r\n", 8, 5.0, &nBytesOut);
 
   }
   //TODO Remove the return, start doing the integration again
-  return;
+  //return;
   for (float x: pos_samples)
   {
     printf("\nSanity checking pos samples vector: %f", x);
@@ -192,10 +195,12 @@ float coilIntPeak(float coil_delta, vector<float> &voltage_samples)
   //Rather than mix and match 3 different integrals
   //printf("\n\n\n\n\n");
   float to_ret = 0;
+  /**
   for(float y: voltage_samples)
   {
     printf("\nStupid sample values, %f", y);
   }
+  **/
   for(int i = 0; i < voltage_samples.size(); i++)
   {
     printf("Sample, %d, %f\n", i, voltage_samples[i]);
