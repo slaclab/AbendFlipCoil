@@ -10,19 +10,10 @@ asynStatus FlipCoilDriver::_writeRead(const char* buffer)
   int test;
   size_t nBytesOut, nBytesIn;
   int eomReason;
-  test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, 8192, 5.0, &nBytesOut, &nBytesIn, &eomReason);
-   //printf("%s::%s: status=%d, buffer=%s, nbytesTrans=%d\n", driverName, 
-   //    functionName, status, buffer, (int)nbytesTransfered);
+  test = pasynOctetSyncIO->writeRead(pasynUserPort, buffer, strlen(buffer), cmdBuffer, CMD_BUFFER_SIZE, 5.0, &nBytesOut, &nBytesIn, &eomReason);
   if (nBytesIn > 0)
   {
-    printf("\nWe got stuff: %s, NumBytesIn: %d", cmdBuffer, nBytesIn);
-    char* token = strtok(cmdBuffer, "\r\n");
-    vector<float> coil_samples;
-    while (token != NULL)
-    {
-      coil_samples.push_back(strtof(token, nullptr));
-      token = strtok(NULL, "\r\n");
-    }
+    asynPrint(pasynUserPort, ASYN_TRACE_FLOW, "Multimeter sent %s\n", cmdBuffer);
   }
    //if (status) {
    //    asynPrint(pasynUserSelf, ASYN_TRACE_ERROR,
@@ -117,7 +108,7 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
     for (int i = 0; i < 5; i++)
     {
-      asynStatus status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, 8192, 5.0, &nBytesIn, &eomReason);
+      asynStatus status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, CMD_BUFFER_SIZE, 5.0, &nBytesIn, &eomReason);
       printf("\nBuffer: %s, eomReason %d, nBytesIn, %d", cmdBuffer, eomReason, nBytesIn);
     }
     //pasynOctetSyncIO->write(pasynUserPort, "MEM CONT\r\n", 8, 5.0, &nBytesOut); #THIS WORKS LIKE ID EXPECT FOR ONCE

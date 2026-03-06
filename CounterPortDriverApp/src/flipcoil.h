@@ -21,30 +21,28 @@
 
 using namespace std;
 
+//Strings to connect with epics pv's
+//TODO: Sort by alphabetical order lmao
 #define P_FlipCoilString "SINE_WAVE"
-
 #define P_TrigSglString "TRIG_SGL"
 #define P_MemModeString "MEM_MODE"
 #define P_GetMemString "GET_MEM"
-
-
-//Important user defined parameters
-#define P_TrigSmplString "NUM_SAMPLES"
-#define P_TimerGapString "TIMER_GAP"
-#define P_MultiTaskString "MULTI_TASK"
-#define P_RepeatString "REPEATS"
-
-
 #define P_TrigModeString "TRIG_MODE"
 #define P_TrigSlopeString "TRIG_SLOPE"
 #define P_TrigLevelString "TRIG_LEVEL"
 #define P_BeepString "BEEP"
 #define P_RmemString "RMEM"
 
+//Important user defined parameter PV strings
+#define P_TrigSmplString "NUM_SAMPLES"
+#define P_TimerGapString "TIMER_GAP"
+#define P_MultiTaskString "MULTI_TASK"
+#define P_RepeatString "REPEATS"
 
 
-#define NUM_MEASUREMENTS 4
 
+#define CMD_BUFFER_SIZE 256 //Sort of arbitrary, I just can't really think of anything larger that the multimeter would send 
+#define SEND_BUFFER_SIZE 128 //Also arbitrary, larger command sequences can just be sent with multiple write commands
 class FlipCoilDriver : public asynPortDriver {
   public:
     FlipCoilDriver(const char *portName, const char *udp, int addr);
@@ -59,11 +57,8 @@ class FlipCoilDriver : public asynPortDriver {
     virtual asynStatus readInt32(asynUser *pasynUser, epicsInt32 *value);
     virtual asynStatus writeFloat64(asynUser *pasynUser, epicsFloat64 value);
     virtual asynStatus readFloat64(asynUser *pasynUser, epicsFloat64 *value);
-    //virtual asynStatus writeOctet(asynUser *pasynUser, const char *buffer, size_t nBytes, size_t *nActual);
 
   protected:
-    //mutex m;
-    //float Avg_Int;
     float Std_Dev;
     int P_FlipCoil;
     int P_MemMode;
@@ -74,6 +69,7 @@ class FlipCoilDriver : public asynPortDriver {
     int P_Rmem;
 
     int num_samples;
+    int num_measurements;
     vector<float> vt_pos_mult;
     vector<float> vt_neg_mult;
     vector<float> vt_avg_mult;
@@ -81,6 +77,6 @@ class FlipCoilDriver : public asynPortDriver {
   private:
     static FlipCoilDriver* port_driver;
     asynUser *pasynUserPort;
-    char cmdBuffer[8192];
-    char sendBuffer[256];
+    char cmdBuffer[CMD_BUFFER_SIZE];
+    char sendBuffer[SEND_BUFFER_SIZE];
 };

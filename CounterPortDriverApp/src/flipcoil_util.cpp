@@ -27,7 +27,7 @@ void FlipCoilDriver::multimeterTask(void)
   _writeRead("NPLC 10\r\n"); //Add some noise filtering 
   _writeRead("NRDGS 170, TIMER\r\n"); //Tells the multimeter it take an amount of readings with a gap indicated by the timer between each reading 
   _writeRead("TIMER 1\r\n"); //Tells the multimeter how long to wait between each reading 
-
+  int coil_delta = 1;
   //Assorted variable declarations 
   float prev = 0; //Storage for the previous variable 
   vector<float> pos_samples; //Vector for positive samples of the waveform
@@ -43,12 +43,11 @@ void FlipCoilDriver::multimeterTask(void)
     _writeRead("TRIG SGL\r\n"); //Command triggers the multimeter to begin readings 
     sleep(172); //TODO: define this based on user provided Timer time 
     pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,170;\r\n", 11, 5.0, &nBytesOut); //Command that tells the multimeter to send it's readings over gpib to us 
-    x
     //For loop that retrieves readings from the multimeter TODO: Define this on user provided num samples.
     for (int i = 0; i < 170; i++)
     {
       //Read command, if there's an error well shoot
-      asynStatus read_status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, 8192, 5.0, &nBytesIn, &eomReason);
+      asynStatus read_status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, CMD_BUFFER_SIZE, 5.0, &nBytesIn, &eomReason);
       if (read_status != asynSuccess)
       {
         asynPrint(pasynUserPort, ASYN_TRACE_ERROR, "Unable to read from multimeter, please restart thread and multimeter, error message: %s\n", pasynUserPort->errorMessage);
@@ -89,10 +88,10 @@ void FlipCoilDriver::multimeterTask(void)
 
   }
   //Then the time integral is calculated within coil_samples coilintpeak
-  float pos_peak = coilIntPeak(COIL_DELTA, pos_samples);
+  float pos_peak = coilIntPeak(coil_delta, pos_samples);
   
   //Third a a time integral of the negative samples is calculated coilintpeak
-  float neg_peak = -1 * coilIntPeak(COIL_DELTA, neg_samples);
+  float neg_peak = -1 * coilIntPeak(coil_delta, neg_samples);
   
   //In theory we'll want to track over time or do multiple measurements, store measurements from measured cycle for further use.
   printf("Calculated Pos Peak: %f Calculated Neg Peak: %f\n\n", pos_peak, neg_peak);
@@ -119,14 +118,15 @@ void FlipCoilDriver::multimeterTask(void)
   float avg = sum / vt_avg_mult.size();
   Avg_Int_Mult.store(avg);
   printf("\n\n\nAveraged integral %g", avg);
-
+  num_measurements += 1;
   //Finding standard deviation
   sum = 0;
   for(float x : vt_avg_mult)
   {
     sum += pow((x - avg), 2);
   }
-  float std_dev = sqrt(sum / NUM_MEASUREMENTS);
+  float std_dev = sqrt(sum / num_measurements);
+  Std_Dev = std_dev;
 }
 
 /**
@@ -187,14 +187,14 @@ float coilIntPeak(float coil_delta, vector<float> &voltage_samples)
   //Rather than mix and match 3 different integrals
   //printf("\n\n\n\n\n");
   float to_ret = 0;
-  for(int i = 0; i < voltage_samples.size(); i++)
+  for(int i = 0; i < int(voltage_samples.size()); i++)
   {
     printf("Sample, %d, %f\n", i, voltage_samples[i]);
     if(voltage_samples[i] < 0)
     {
       continue;
     }
-    if(i == 0 || i == voltage_samples.size() - 1)
+    if(i == 0 || i == int(voltage_samples.size()) - 1)
     {
       to_ret += voltage_samples[i];
 
@@ -221,8 +221,8 @@ void sineWaveTester(vector<float>& coil_samples)
   const float pi = 3.1415926535;
   const int amplitude = 1;
   const float offset = 2 * pi / 10;
-  for(int i = 0; i < COIL_SAMPLES; i++)
+  for(int i = 0; i < 200; i++)
   {
-    coil_samples.push_back(amplitude * sin(2 * pi * i / COIL_SAMPLES + offset));
+    coil_samples.push_back(amplitude * sin(2 * pi * i / 200 + offset));
   }
 }
