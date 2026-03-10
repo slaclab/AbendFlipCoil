@@ -7,3 +7,11 @@ TIMER
 NUM SAMPLES 
 MULTI TASK 
 REPEASTS
+
+
+Operator picks a num readings to take and a time value in between readings
+Ok so the intended workflow is use channel access to update a PV
+Updating this launches the muiltimeter TASK
+The multimeter task takes samples from the multimeter and calculates an integral
+These integral calculations are pushed to pv's the operator can see and use for future calibration
+

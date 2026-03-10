@@ -51,6 +51,10 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
         break;
     }
   }
+  else if(parameter == P_NumSamples)
+  {
+    num_samples = value;
+  }
   else if(parameter == P_GetMem)
   {
     _writeRead("PRESET NORM\r\n");
@@ -67,11 +71,6 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     printf("\n\nAfter sleep, should try rmem");
     _writeRead("MCOUNT?\r\n");
     _writeRead("ERRSTR?\r\n");
-  }
-  else if(parameter == P_NumSamples)
-  {
-    num_samples = value;
-    sprintf(sendBuffer, "NRDGS %d, TIMER\r\n", num_samples);
   }
 
   if(strlen(sendBuffer) > 0)

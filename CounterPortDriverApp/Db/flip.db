@@ -46,6 +46,14 @@ record(ao, "$(P):GET_MEM")
     field(SCAN, "Passive")
   }
 
+record(ao, "$(P):GET_MEM")
+{
+    field(PINI, "0")
+    field(DTYP, "asynInt32")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))GET_MEM")
+    field(SCAN, "Passive")
+  }
+
 record(ao, "$(P):TRIG_SMPLS")
 {
     field(PINI, "0")
@@ -85,3 +93,5 @@ record(ai, "$(P):BEEP_RBV")
     field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))BEEP")
     field(SCAN, "I/O Intr")
   }
+
+

@@ -70,6 +70,7 @@ class FlipCoilDriver : public asynPortDriver {
 
     int num_samples;
     int num_measurements;
+    int time_delay;
     vector<float> vt_pos_mult;
     vector<float> vt_neg_mult;
     vector<float> vt_avg_mult;
