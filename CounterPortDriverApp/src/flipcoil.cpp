@@ -61,6 +61,9 @@ FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) 
   createParam(P_BeepString, asynParamFloat64, &P_Beep);
   createParam(P_TrigSmplString, asynParamInt32, &P_NumSamples);
   createParam(P_RmemString, asynParamFloat64, &P_Rmem);
+  createParam(P_TimerGapString, asynParamInt32, &P_TimerGap);
+  createParam(P_RepeatString, asynParamInt32, &P_NumMeasurements);
+  createParam(P_WaveformString, asynParamInt32Array, &P_Waveform);
 
 
   status = (asynStatus)(epicsThreadCreate("LujkoMultimeterTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::multimeterTask, this) == NULL);

@@ -38,6 +38,7 @@ using namespace std;
 #define P_TimerGapString "TIMER_GAP"
 #define P_MultiTaskString "MULTI_TASK"
 #define P_RepeatString "REPEATS"
+#define P_WaveformString "WAVEFORM"
 
 
 
@@ -61,16 +62,22 @@ class FlipCoilDriver : public asynPortDriver {
   protected:
     float Std_Dev;
     int P_FlipCoil;
-    int P_MemMode;
-    int P_GetMem;
-    int P_TrigSgl;
-    int P_Beep;
-    int P_NumSamples;
-    int P_Rmem;
+    int P_MemMode; //Covered  TODO:Maybe remove this?
+    int P_GetMem; //Cpvered 
+    int P_TrigSgl; //Covered 
+    int P_Beep; //Covered 
+    int P_NumSamples; //Covered 
+    int P_Rmem; //Covered 
+    int P_TimerGap; //Covered 
+    int P_NumMeasurements; //Covered 
+    int P_Waveform;
+    
 
-    int num_samples;
-    int num_measurements;
-    int time_delay;
+
+    int num_samples = 170; //Number of samples taken per integal calculation
+    int num_measurements = 1; //Amount of times to repeat integrap calculation
+    int time_delay = 1; // Delay between each sample taken during integral calculation given in seconds
+    int hold_time = num_samples * time_delay; //We must hold for a certain amount of itme before sending commands to multimet to not crash it 
     vector<float> vt_pos_mult;
     vector<float> vt_neg_mult;
     vector<float> vt_avg_mult;

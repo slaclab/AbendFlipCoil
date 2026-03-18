@@ -46,11 +46,11 @@ record(ao, "$(P):GET_MEM")
     field(SCAN, "Passive")
   }
 
-record(ao, "$(P):GET_MEM")
+record(ao, "$(P):TIM_GAP")
 {
     field(PINI, "0")
     field(DTYP, "asynInt32")
-    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))GET_MEM")
+    field(OUT, "@asyn($(PORT),$(ADDR),$(TIMEOUT))TIMER_GAP")
     field(SCAN, "Passive")
   }
 
@@ -94,4 +94,12 @@ record(ai, "$(P):BEEP_RBV")
     field(SCAN, "I/O Intr")
   }
 
-
+record(waveform, "$(P):WAVEFORM")
+{
+    field(PINI, "1")
+    field(DTYP, "asynInt32ArrayIn")
+    field(INP, "@asyn($(PORT),$(ADDR),$(TIMEOUT))WAVEFORM")
+    field(FTVL, "SHORT")
+    field(NELM, "20000")
+    field(SCAN, "I/O Intr")
+  }

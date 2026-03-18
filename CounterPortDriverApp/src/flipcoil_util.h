@@ -15,6 +15,7 @@
 #include <asynPortDriver.h>
 #include <vector>
 #include <cmath>
+#include <unistd.h>
 
 using namespace std;
 

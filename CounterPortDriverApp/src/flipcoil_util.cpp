@@ -22,11 +22,15 @@ void FlipCoilDriver::multimeterTask(void)
   asynPrint(pasynUserPort, ASYN_TRACE_FLOW, "Beginning the multimeter task\n");
   pasynOctetSyncIO->flush(pasynUserPort); //Purge command buffer of incomplete data 
   _writeRead("PRESET NORM\r\n"); //Set multimeter to known settings defined in more detail in manual 
+  _writeRead("END ALWAYS\r\n");
   _writeRead("TRIG HOLD\r\n"); //Tells multimeter to wait for trigger signal
   _writeRead("MEM FIFO\r\n"); //Turns memory on in the multimeter, stores samples first in first out 
   _writeRead("NPLC 10\r\n"); //Add some noise filtering 
-  _writeRead("NRDGS 170, TIMER\r\n"); //Tells the multimeter it take an amount of readings with a gap indicated by the timer between each reading 
-  _writeRead("TIMER 1\r\n"); //Tells the multimeter how long to wait between each reading 
+  sprintf(sendBuffer, "NRDGS %d, TIMER\r\n", num_samples);
+
+  _writeRead(sendBuffer);
+  sprintf(sendBuffer, "TIMER %d\r\n", time_delay);
+  _writeRead(sendBuffer); //Tells the multimeter how long to wait between each reading 
   
   //Assorted variable declarations 
   int coil_delta = 1;
@@ -43,10 +47,11 @@ void FlipCoilDriver::multimeterTask(void)
   while (crossings < 3)
   {
     _writeRead("TRIG SGL\r\n"); //Command triggers the multimeter to begin readings 
-    sleep(172); //TODO: define this based on user provided Timer time 
-    pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,170;\r\n", 11, 5.0, &nBytesOut); //Command that tells the multimeter to send it's readings over gpib to us 
+    usleep(1000000* time_delay * num_samples);
+    sprintf(sendBuffer, "RMEM 1,%d;\r\n", num_samples);
+    pasynOctetSyncIO->write(pasynUserPort, sendBuffer, 11, 5.0, &nBytesOut); //Command that tells the multimeter to send it's readings over gpib to us 
     //For loop that retrieves readings from the multimeter TODO: Define this on user provided num samples.
-    for (int i = 0; i < 170; i++)
+    for (int i = 0; i < num_samples; i++)
     {
       //Read command, if there's an error well shoot
       asynStatus read_status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, CMD_BUFFER_SIZE, 5.0, &nBytesIn, &eomReason);

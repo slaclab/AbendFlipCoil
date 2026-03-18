@@ -53,8 +53,29 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
   }
   else if(parameter == P_NumSamples)
   {
-    num_samples = value;
+    if(value > 0)
+    {
+      num_samples = value;
+      hold_time = num_samples * time_delay;
+    }
+
   }
+  else if(parameter == P_NumMeasurements)
+  {
+    if(value > 0)
+    {
+      num_measurements = value;
+    }
+  }
+  else if(parameter == P_TimerGap)
+  {
+    if(time_delay > 0)
+    {
+      time_delay = value;
+      hold_time = num_samples * time_delay;
+    }
+  }
+ 
   else if(parameter == P_GetMem)
   {
     _writeRead("PRESET NORM\r\n");
@@ -63,11 +84,13 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     _writeRead("TRIG HOLD\r\n");
     _writeRead("MEM LIFO\r\n");
     _writeRead("NPLC 10\r\n");
-    _writeRead("NRDGS 5, TIMER\r\n");
-    _writeRead("TIMER 3\r\n");
+    sprintf(sendBuffer, "NRDGS %d, TIMER\r\n", num_samples);
+    _writeRead(sendBuffer);
+    sprintf(sendBuffer, "TIMER %d\r\n", time_delay);
+    _writeRead(sendBuffer);
     _writeRead("MCOUNT?\r\n");
     _writeRead("TRIG SGL\r\n");
-    sleep(17);
+    sleep(time_delay * num_samples);
     printf("\n\nAfter sleep, should try rmem");
     _writeRead("MCOUNT?\r\n");
     _writeRead("ERRSTR?\r\n");
