@@ -16,5 +16,3 @@ The multimeter task takes samples from the multimeter and calculates an integral
 These integral calculations are pushed to pv's the operator can see and use for future calibration
 
 
-TEst
-
