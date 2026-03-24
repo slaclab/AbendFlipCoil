@@ -126,14 +126,15 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     int eomReason;
     printf("\n\nThe value we wrote was %f", value);
     pasynOctetSyncIO->flush(pasynUserPort);
-    pasynOctetSyncIO->write(pasynUserPort, "RMEM 1,5\r\n", 8, 5.0, &nBytesOut);
+    sprintf(sendBuffer, "RMEM 1,%d;\r\n", num_samples);
+    pasynOctetSyncIO->write(pasynUserPort, sendBuffer, 11, 5.0, &nBytesOut); //Command that tells the multimeter to send it's readings over gpib to us 
 
-    for (int i = 0; i < 5; i++)
+    for (int i = 0; i < num_samples; i++)
     {
       asynStatus status = pasynOctetSyncIO->read(pasynUserPort, cmdBuffer, CMD_BUFFER_SIZE, 5.0, &nBytesIn, &eomReason);
       printf("\nBuffer: %s, eomReason %d, nBytesIn, %d", cmdBuffer, eomReason, nBytesIn);
+
     }
-    //pasynOctetSyncIO->write(pasynUserPort, "MEM CONT\r\n", 8, 5.0, &nBytesOut); #THIS WORKS LIKE ID EXPECT FOR ONCE
     pasynOctetSyncIO->write(pasynUserPort, "MEM FIFO\r\n", 8, 5.0, &nBytesOut);
   }
 

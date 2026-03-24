@@ -37,6 +37,7 @@ void FlipCoilDriver::multimeterTask(void)
   float prev = 0; 
   vector<float> pos_samples; 
   vector<float> neg_samples; 
+  vector<epicsFloat32> samples;
   int crossings = 0; 
   //variables for future pasynOctet calls
   size_t nBytesOut, nBytesIn; 
@@ -79,6 +80,7 @@ void FlipCoilDriver::multimeterTask(void)
       //Check we've found at least one zero crossing before storing data, if we haven't this reading's cycle will be incomplete.
       else if (crossings > 0)
       {
+        samples.push_back(reading);
         if (reading < 0)
         {
           neg_samples.push_back(-1 * reading); // we multiply by -1 to make values positive so that the integral calc works properly 
@@ -90,6 +92,20 @@ void FlipCoilDriver::multimeterTask(void)
       }
       prev = reading;
     }
+    //Push all our taken samples into a waveform record
+    epicsFloat32 *buf = new epicsFloat32[samples.size()];
+    int ticker = 0;
+    for (float f: samples)
+    {
+      buf[ticker] = 1;
+      ticker += 1;
+      printf("%f\n", f);
+    }
+    printf("Size of samples %d\n", int(samples.size()));
+    printf("Waveform param index %d\n", P_Waveform);
+    callParamCallbacks();
+    doCallbacksFloat32Array(samples.data(), samples.size(), P_Waveform, 0);
+    callParamCallbacks();
     // TODO: Figure out if this is necessary,best practice would be get enough samples that we don't need another batch
     pasynOctetSyncIO->write(pasynUserPort, "MEM FIFO\r\n", 8, 5.0, &nBytesOut); //In case we need another set of samples, turn the memory back on/
 
