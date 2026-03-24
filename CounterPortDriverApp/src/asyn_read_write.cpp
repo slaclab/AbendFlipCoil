@@ -34,7 +34,6 @@ asynStatus FlipCoilDriver::_writeRead(const char* buffer)
 asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
 {
   int parameter = pasynUser->reason;
-  sprintf(sendBuffer, "");
 
   if(parameter == P_MemMode)
   {
@@ -96,10 +95,6 @@ asynStatus FlipCoilDriver::writeInt32(asynUser *pasynUser, epicsInt32 value)
     _writeRead("ERRSTR?\r\n");
   }
 
-  if(strlen(sendBuffer) > 0)
-  {
-    _writeRead(sendBuffer);
-  }
   
   asynStatus status = setIntegerParam(pasynUser->reason, value);
   callParamCallbacks();
@@ -150,10 +145,6 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
     _writeRead("MCOUNT?\r\n");
   }
 
-  if(strlen(sendBuffer) > 0)
-  {
-    _writeRead(sendBuffer);
-  }
 
   asynStatus status = setDoubleParam(pasynUser->reason, value);
   callParamCallbacks();
