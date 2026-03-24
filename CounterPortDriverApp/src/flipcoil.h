@@ -62,7 +62,7 @@ class FlipCoilDriver : public asynPortDriver {
   protected:
     float Std_Dev;
     int P_FlipCoil;
-    int P_MemMode; //Covered  TODO:Maybe remove this?
+    int P_MemMode; //Covered  TODO:Maybe remove this, think about if user should have access to this?
     int P_GetMem; //Cpvered 
     int P_TrigSgl; //Covered 
     int P_Beep; //Covered 
@@ -70,7 +70,7 @@ class FlipCoilDriver : public asynPortDriver {
     int P_Rmem; //Covered 
     int P_TimerGap; //Covered 
     int P_NumMeasurements; //Covered 
-    int P_Waveform;
+    int P_Waveform; //Covered
     
 
 

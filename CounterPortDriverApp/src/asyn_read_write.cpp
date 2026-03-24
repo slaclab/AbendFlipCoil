@@ -144,12 +144,9 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   }
   else if (parameter == P_TrigSgl)
   {
-    //sprintf(sendBuffer, "TRIG SGL\r\n");
-    //_writeRead("MEM CLR\r\n");
     _writeRead("MCOUNT?\r\n");
-    //_writeRead("TARM SGL\r\n");
     _writeRead("TRIG SGL\r\n");
-    sleep(17);
+    sleep(num_samples * time_delay);
     _writeRead("MCOUNT?\r\n");
   }
 

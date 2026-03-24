@@ -94,15 +94,6 @@ void FlipCoilDriver::multimeterTask(void)
     }
     //Push all our taken samples into a waveform record
     epicsFloat32 *buf = new epicsFloat32[samples.size()];
-    int ticker = 0;
-    for (float f: samples)
-    {
-      buf[ticker] = 1;
-      ticker += 1;
-      printf("%f\n", f);
-    }
-    printf("Size of samples %d\n", int(samples.size()));
-    printf("Waveform param index %d\n", P_Waveform);
     callParamCallbacks();
     doCallbacksFloat32Array(samples.data(), samples.size(), P_Waveform, 0);
     callParamCallbacks();
