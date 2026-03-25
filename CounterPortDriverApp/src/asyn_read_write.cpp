@@ -141,7 +141,7 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
   {
     _writeRead("MCOUNT?\r\n");
     _writeRead("TRIG SGL\r\n");
-    sleep(num_samples * time_delay);
+    usleep(1000000* time_delay * num_samples);
     _writeRead("MCOUNT?\r\n");
   }
 
