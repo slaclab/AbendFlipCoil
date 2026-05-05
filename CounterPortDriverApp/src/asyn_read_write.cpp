@@ -135,7 +135,18 @@ asynStatus FlipCoilDriver::writeFloat64(asynUser *pasynUser, epicsFloat64 value)
 
   if (parameter == P_Beep)
   {
+    //epicsInt32 test;
+    double test;
+    getDoubleParam(P_IntegralAvg, &test);
+    printf("Test lol: %d\n", test);
+    setIntegerParam(P_IntegralAvg, 1000);
+    callParamCallbacks();
     sprintf(sendBuffer, "BEEP\r\n");
+  }
+  //reset 
+  else if (parameter == P_Reset)
+  {
+    _writeRead("PRESET NORM");
   }
   else if (parameter == P_TrigSgl)
   {

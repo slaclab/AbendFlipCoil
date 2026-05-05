@@ -10,8 +10,8 @@ FlipCoilDriver* FlipCoilDriver::port_driver = nullptr;
 FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) : asynPortDriver(
     portName,
     1,
-    asynFloat64Mask | asynInt32Mask | asynOctetMask | asynDrvUserMask | asynFloat32ArrayMask,
-    asynFloat64Mask | asynInt32Mask | asynFloat32ArrayMask,
+    asynFloat64Mask | asynInt32Mask | asynOctetMask | asynDrvUserMask | asynFloat32ArrayMask ,
+    asynFloat64Mask | asynInt32Mask | asynFloat32ArrayMask ,
     0,
     1,
     0,
@@ -64,6 +64,10 @@ FlipCoilDriver::FlipCoilDriver(const char *portName, const char* udp, int addr) 
   createParam(P_TimerGapString, asynParamInt32, &P_TimerGap);
   createParam(P_RepeatString, asynParamInt32, &P_NumMeasurements);
   createParam(P_WaveformString, asynParamFloat32Array, &P_Waveform);
+  createParam(P_IntegralAvgString, asynParamFloat64, &P_IntegralAvg);
+  createParam(P_IntegralNegString, asynParamFloat64, &P_IntegralNeg);
+  createParam(P_IntegralPosString, asynParamFloat64, &P_IntegralPos);
+  createParam(P_ResetString, asynParamFloat64, &P_Reset);
 
 
   status = (asynStatus)(epicsThreadCreate("LujkoMultimeterTask", epicsThreadPriorityMedium, epicsThreadGetStackSize(epicsThreadStackMedium), (EPICSTHREADFUNC)::multimeterTask, this) == NULL);

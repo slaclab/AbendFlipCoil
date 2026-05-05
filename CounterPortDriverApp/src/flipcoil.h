@@ -39,6 +39,10 @@ using namespace std;
 #define P_MultiTaskString "MULTI_TASK"
 #define P_RepeatString "REPEATS"
 #define P_WaveformString "WAVEFORM"
+#define P_IntegralAvgString "INTEGRAL_AVG"
+#define P_IntegralNegString "INTEGRAL_NEG"
+#define P_IntegralPosString "INTEGRAL_POS"
+#define P_ResetString "RESET"
 
 
 
@@ -71,6 +75,10 @@ class FlipCoilDriver : public asynPortDriver {
     int P_TimerGap; //Covered 
     int P_NumMeasurements; //Covered 
     int P_Waveform; //Covered
+    int P_IntegralAvg;
+    int P_IntegralPos;
+    int P_IntegralNeg;
+    int P_Reset;
     
 
 

@@ -106,6 +106,8 @@ void FlipCoilDriver::multimeterTask(void)
   
   //Third a a time integral of the negative samples is calculated coilintpeak
   float neg_peak = -1 * coilIntPeak(coil_delta, neg_samples);
+  setDoubleParam(P_IntegralPos, neg_peak);
+  setDoubleParam(P_IntegralNeg, pos_peak);
   
   //In theory we'll want to track over time or do multiple measurements, store measurements from measured cycle for further use.
   printf("Calculated Pos Peak: %f Calculated Neg Peak: %f\n\n", pos_peak, neg_peak);
@@ -129,9 +131,11 @@ void FlipCoilDriver::multimeterTask(void)
   }
 
   //TODO Pass this by reference? or make the task return this, im not sure what it's used for
-  float avg = sum / vt_avg_mult.size();
+  epicsFloat64 avg = sum / vt_avg_mult.size();
   Avg_Int_Mult.store(avg);
+  setDoubleParam(P_IntegralAvg, avg);
   printf("\n\n\nAveraged integral %g", avg);
+  callParamCallbacks();
   num_measurements += 1;
   //Finding standard deviation
   sum = 0;
